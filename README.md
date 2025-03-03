@@ -1,75 +1,101 @@
-# Klee Electron
+# Klee Client
 
-## Prerequisites
+## System Requirements
 
-To use Electron, you need to install Node.js. We recommend that you use the latest LTS version available.
+- Node.js 20.x or higher
+- Yarn 1.22.19 or higher
 
-Please install Node.js using pre-built installers for your platform. You may encounter incompatibility issues with different development tools otherwise.
+## Installation
 
-To check that Node.js was installed correctly, type the following commands in your terminal client:
+### 1. Clone the Repository
 
-```sh
-node -v
-npm -v
+```bash
+git clone https://github.com/your-organization/klee-client.git
+cd klee-client
 ```
 
-The commands should print the versions of Node.js and npm accordingly.
+### 2. Install Dependencies
 
-## Install
-
-```sh
-yarn
+```bash
+yarn install
 ```
 
-## Run
+### 3. Configure Environment Variables
 
-```sh
-yarn start
+Copy the `.env.example` file to `.env`:
+
+```bash
+cp .env.example .env
 ```
 
-We prefer `Yarn` as package manager.
+Then edit the `.env` file according to your needs, configuring the following environment variables:
 
-## Build
+#### Basic Configuration
 
-```sh
-yarn make
+```
+# Remote Mode Configuration
+# Set to 'true' to enable remote mode, 'false' to use local mode, default is 'false'
+VITE_USE_SUPABASE=false
+
+# Supabase configuration (only required if VITE_USE_SUPABASE=true)
+# These are used to configure your own remote service
+# If not specified, the system will use our default deployed service
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_AUTH_CALLBACK_URL=your_callback_url
+
+# Ollama service address, default: http://localhost:11434
+VITE_OLLAMA_BASE_URL=http://localhost:11434
+
+# Local Python service address, default: http://localhost:6190
+VITE_REQUEST_PREFIX_URL=http://localhost:6190
 ```
 
-## Tech Stack
+#### macOS App Signing and Notarization (required only for production builds)
 
-- [electron](https://www.electronjs.org/)
-- [electron-forge](https://www.electronforge.io/)
-- [vite](https://vitejs.dev/)
-- [Typescript](https://www.typescriptlang.org/)
-- [react](https://reactjs.org/)
-- [tailwindcss](https://tailwindcss.com/)
-- [shadcn ui](https://ui.shadcn.com/)
-- [framer-motion](https://www.framer.com/)
-- [react-lucide](https://lucide.dev/)
-- [react-query](https://tanstack.com/query/latest/)
-- [postcss](https://postcss.org/)
-- [react-router-dom](https://reactrouter.com/en/6.16.0)
-- [eslint](https://eslint.org/)/[stylelint](https://stylelint.io/)
-- [prettier](https://prettier.io/)
-- [svgr](https://react-svgr.com/)
-- [editorconfig](https://editorconfig.org/)
-- [husky](https://typicode.github.io/husky/#/)/[lint-staged](https://github.com/okonet/lint-staged)
-- [commitlint](https://commitlint.js.org/)
+If you need to build a signed application for macOS, configure the following environment variables:
 
-## Project Structure
-
-```sh
-src
-├── app.tsx     # App entry
-├── assets      # Assets for images, favicon etc
-├── components  # React components
-├── hooks       # React hooks
-├── i18n        # i18n files
-├── lib         # Utils、tools、services
-├── main.tsx    # File entry
-├── pages       # One .tsx per page
-├── router.tsx  # Routers
-├── styles      # Less files
-├── types       # Typescript types
-└── vite-env.d.ts
 ```
+# Apple ID account
+APPLEID=your_apple_id@example.com
+# Apple ID password or app-specific password
+APPLEIDPASS=your_apple_id_password
+# Apple Developer Team ID
+APPLETEAMID=your_team_id
+```
+
+### 4. Run in Development Mode
+
+```bash
+yarn dev
+```
+
+This will start the Vite development server and the Electron application.
+
+### 5. Build the Application
+
+```bash
+yarn build
+```
+
+After building, you can find the compiled application in the `dist` directory.
+
+## Other Useful Commands
+
+- `yarn type-check`: Run TypeScript type checking
+- `yarn lint`: Run ESLint and Stylelint for code checking
+- `yarn lint:fix`: Automatically fix fixable code style issues
+- `yarn generate-icons`: Generate app icons (requires app-icon.png file)
+
+## Technology Stack
+
+- Electron
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Radix UI
+- i18next (Internationalization)
+- React Query
+- Jotai (State Management)
+
