@@ -187,7 +187,7 @@ export default function KnowledgeDetail() {
                   </TableCell>
                   <TableCell>{filesize(item.size)}</TableCell>
                   <TableCell className="max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
-                    {new Date(item.os_time * 1000).toLocaleString()}
+                    {new Date(item.os_mtime * 1000).toLocaleString()}
                   </TableCell>
                   <TableCell>
                     <CircleCheck className="h-4 w-4" />

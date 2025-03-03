@@ -130,7 +130,7 @@ export interface IEditorProps {
 
 export interface IVector extends IBaseModel {
   id: string
-  os_time: number
+  os_mtime: number
   name: string
   path: string
   knowledgeId: string
