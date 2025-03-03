@@ -1,4 +1,4 @@
-# Klee
+# <img src="public/favicon.ico" alt="Klee Logo" width="40" height="40" style="vertical-align: middle;"> Klee
 Klee is a fully open-source platform that brings secure, local AI to your desktop.
 
 For more information, visit our <u>[Website](https://kleedesktop.com/)</u>.
@@ -6,35 +6,35 @@ For more information, visit our <u>[Website](https://kleedesktop.com/)</u>.
 ![Klee Screenshot](public/KleeScreenShot.png)
 
 At its core, Klee is built on:
-- Ollama: For running local LLMs quickly and efficiently.
-- LlamaIndex: As the data framework.
+- <u>[Ollama](https://ollama.com/)</u>: For running local LLMs quickly and efficiently.
+- <u>[LlamaIndex](https://www.llamaindex.ai/)</u>: As the data framework.
 
 With Klee, you can:
 - Download and run open-source large language models on your desktop with a single click - no terminal or technical background required.
 - Utilize the built-in knowledge base to store your local and private files with complete data security.
 - Save all LLM responses to your knowledge base using the built-in markdown notes feature.
 
-## System Requirements
+## 🔧 Installation
+
+### 1. System Requirements
 
 - Node.js 20.x or higher
 - Yarn 1.22.19 or higher
 
-## Installation
-
-### 1. Clone the Repository
+### 2. Clone the Repository
 
 ```bash
 git clone https://github.com/signerlabs/klee-client.git
 cd klee-client
 ```
 
-### 2. Install Dependencies
+### 3. Install Dependencies
 
 ```bash
 yarn install
 ```
 
-### 3. Configure Environment Variables
+### 4. Configure Environment Variables
 
 Copy the `.env.example` file to `.env`:
 
@@ -78,7 +78,7 @@ APPLEIDPASS=your_apple_id_password
 APPLETEAMID=your_team_id
 ```
 
-### 4. Run in Development Mode
+### 5. Run in Development Mode
 
 ```bash
 yarn dev
@@ -86,7 +86,7 @@ yarn dev
 
 This command will start both the Vite development server and the Electron application.
 
-### 5. Build the Application
+### 6. Build the Application
 
 ```bash
 yarn build
@@ -94,14 +94,14 @@ yarn build
 
 After building is complete, you can find the compiled application in the `dist` directory.
 
-## Other Useful Commands
+## 🚀 Other Useful Commands
 
 - `yarn type-check`: Run TypeScript type checking
 - `yarn lint`: Run ESLint and Stylelint for code quality checking
 - `yarn lint:fix`: Automatically fix resolvable code style issues
 - `yarn generate-icons`: Generate application icons (requires app-icon.png file)
 
-## Technology Stack
+## 📖 Technology Stack
 
 - <u>[Electron](https://www.electronjs.org/)</u>
 - <u>[React](https://react.dev/)</u>
