@@ -1,4 +1,18 @@
-# Klee Client
+# Klee
+Klee is a fully open-source platform that brings secure, local AI to your desktop.
+
+For more information, visit our <u>[Website](https://kleedesktop.com/)</u>.
+
+![Klee Screenshot](public/KleeScreenShot.png)
+
+At its core, Klee is built on:
+- Ollama: For running local LLMs quickly and efficiently.
+- LlamaIndex: As the data framework.
+
+With Klee, you can:
+- Download and run open-source large language models on your desktop with a single click - no terminal or technical background required.
+- Utilize the built-in knowledge base to store your local and private files with complete data security.
+- Save all LLM responses to your knowledge base using the built-in markdown notes feature.
 
 ## System Requirements
 
@@ -28,13 +42,13 @@ Copy the `.env.example` file to `.env`:
 cp .env.example .env
 ```
 
-Then edit the `.env` file according to your needs, configuring the following environment variables:
+Edit the `.env` file to configure the following environment variables according to your requirements:
 
 #### Basic Configuration
 
 ```
 # Remote Mode Configuration
-# Set to 'true' to enable remote mode, 'false' to use local mode, default is 'false'
+# Set to 'true' to enable remote mode, 'false' to use local mode (default is 'false')
 VITE_USE_SUPABASE=false
 
 # Supabase configuration (only required if VITE_USE_SUPABASE=true)
@@ -44,10 +58,10 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_AUTH_CALLBACK_URL=your_callback_url
 
-# Ollama service address, default: http://localhost:11434
+# Ollama service address (default: http://localhost:11434)
 VITE_OLLAMA_BASE_URL=http://localhost:11434
 
-# Local Python service address, default: http://localhost:6190
+# Local Python service address (default: http://localhost:6190)
 VITE_REQUEST_PREFIX_URL=http://localhost:6190
 ```
 
@@ -70,7 +84,7 @@ APPLETEAMID=your_team_id
 yarn dev
 ```
 
-This will start the Vite development server and the Electron application.
+This command will start both the Vite development server and the Electron application.
 
 ### 5. Build the Application
 
@@ -78,24 +92,23 @@ This will start the Vite development server and the Electron application.
 yarn build
 ```
 
-After building, you can find the compiled application in the `dist` directory.
+After building is complete, you can find the compiled application in the `dist` directory.
 
 ## Other Useful Commands
 
 - `yarn type-check`: Run TypeScript type checking
-- `yarn lint`: Run ESLint and Stylelint for code checking
-- `yarn lint:fix`: Automatically fix fixable code style issues
-- `yarn generate-icons`: Generate app icons (requires app-icon.png file)
+- `yarn lint`: Run ESLint and Stylelint for code quality checking
+- `yarn lint:fix`: Automatically fix resolvable code style issues
+- `yarn generate-icons`: Generate application icons (requires app-icon.png file)
 
 ## Technology Stack
 
-- Electron
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- Radix UI
-- i18next (Internationalization)
-- React Query
-- Jotai (State Management)
-
+- <u>[Electron](https://www.electronjs.org/)</u>
+- <u>[React](https://react.dev/)</u>
+- <u>[TypeScript](https://www.typescriptlang.org/)</u>
+- <u>[Vite](https://vite.dev/)</u>
+- <u>[Tailwind CSS](https://tailwindcss.com/)</u>
+- <u>[Radix UI](https://www.radix-ui.com/)</u>
+- <u>[i18nex](https://www.i18next.com/)</u>
+- <u>[React Query](https://github.com/TanStack/query/)</u>
+- <u>[Jotai](https://jotai.org/)</u>
