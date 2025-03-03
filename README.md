@@ -78,13 +78,7 @@ APPLEIDPASS=your_apple_id_password
 APPLETEAMID=your_team_id
 ```
 
-### 5. Run in Development Mode
-
-```bash
-yarn dev
-```
-
-#### Set Up Backend Service
+### 5. Set Up Backend Service
 
 Before running the client, you need to set up and start the backend service. Clone and configure the backend service repository:
 
@@ -97,9 +91,15 @@ Follow the installation instructions in the backend repository to set up and sta
 
 Refer to the [klee-service repository](https://github.com/signerlabs/klee-service) for detailed backend setup instructions.
 
+### 6. Run in Development Mode
+
+```bash
+yarn dev
+```
+
 This command will start both the Vite development server and the Electron application.
 
-### 6. Build the Application
+### 7. Build the Application (Optional)
 
 ```bash
 yarn build
