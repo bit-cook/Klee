@@ -10,7 +10,7 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-organization/klee-client.git
+git clone https://github.com/signerlabs/klee-client.git
 cd klee-client
 ```
 
