@@ -24,7 +24,6 @@ import {
 import Account from './setting/Account'
 import { useTranslation } from 'react-i18next'
 import SettingsDialog from './dialog/SettingsDialog'
-import { toast } from 'sonner'
 
 export default function RootLayout() {
   const { t } = useTranslation()
@@ -65,12 +64,12 @@ export default function RootLayout() {
       return
     }
     if (!supabase) {
-      toast.error('Supabase is not initialized')
+      // toast.error('Supabase is not initialized')
       setConfig((config) => ({ ...config, privateMode: true }))
       return
     }
     setShowNoLogin(!config.privateMode && !user)
-  }, [user, config.privateMode])
+  }, [user, config.privateMode, setConfig])
 
   const handleNoLogin = () => {
     setConfig((config) => ({ ...config, privateMode: true }))

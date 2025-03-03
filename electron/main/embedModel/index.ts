@@ -51,15 +51,15 @@ export async function checkIfNeededDownloadEmbedModel() {
 
 async function checkIfModelExist(modelList: EmbedModelInfo[]): Promise<boolean> {
   try {
-    // If model list is empty, return false directly
-    if (!modelList || modelList.length === 0) {
-      return true
-    }
-
     // Check if embedModelFolderPath exists
     if (!fs.existsSync(embedModelFolderPath)) {
       logger.info(`Model directory does not exist: ${embedModelFolderPath}`)
       return false
+    }
+
+    // If model list is empty, return false directly
+    if (!modelList || modelList.length === 0) {
+      return true
     }
 
     // Get all folders in directory
@@ -89,7 +89,9 @@ async function fetchEmbedModelList(): Promise<EmbedModelInfo[]> {
 }
 
 async function fetchModelInfo(name: string) {
-  if (!supabase) return null
+  if (!supabase) {
+    return null
+  }
   const { data, error } = await supabase
     .from('embed_models')
     .select('*')

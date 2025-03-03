@@ -84,6 +84,19 @@ APPLETEAMID=your_team_id
 yarn dev
 ```
 
+#### Set Up Backend Service
+
+Before running the client, you need to set up and start the backend service. Clone and configure the backend service repository:
+
+```bash
+git clone https://github.com/signerlabs/klee-service.git
+cd klee-service
+```
+
+Follow the installation instructions in the backend repository to set up and start the service. The backend service needs to be running on port 6190 (or the port you specified in `VITE_REQUEST_PREFIX_URL`) for the client to connect properly.
+
+Refer to the [klee-service repository](https://github.com/signerlabs/klee-service) for detailed backend setup instructions.
+
 This command will start both the Vite development server and the Electron application.
 
 ### 6. Build the Application
