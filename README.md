@@ -1,4 +1,4 @@
-# <img src="public/favicon.ico" alt="Klee Logo" width="40" height="40" style="vertical-align: middle;"> Klee
+# Klee
 Klee is a fully open-source platform that brings secure, local AI to your desktop.
 
 For more information, visit our <u>[Website](https://kleedesktop.com/)</u>.
