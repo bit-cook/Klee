@@ -35,18 +35,19 @@ export async function handleFileOpen(_: unknown, filterName = 'Documents', multi
     ],
     filters: [
       /**
-       * 1. Text files:
-       *    · CSV: Comma-separated values format
-       *    · docx: Microsoft Word document
-       *    · .epub: EPUB e-book format
-       *    · hwp: Hangul Word Processor file
-       *    · ipynb: Jupyter Notebook file
-       *    · md: Markdown file
-       *    · pdf: Portable Document Format
-       *    · .ppt, .pptm, .pptx: Microsoft PowerPoint presentation
-       *    · mbox: MBOX email archive
-       * 2. Other formats:
-       *    · txt: Plain text file
+       * https://docs.llamaindex.ai/en/stable/module_guides/loading/simpledirectoryreader/
+       * .csv - comma-separated values
+       * .docx - Microsoft Word
+       * .epub - EPUB ebook format
+       * .hwp - Hangul Word Processor
+       * .ipynb - Jupyter Notebook
+       * .jpeg, .jpg - JPEG image
+       * .mbox - MBOX email archive
+       * .md - Markdown
+       * .mp3, .mp4 - audio and video
+       * .pdf - Portable Document Format
+       * .png - Portable Network Graphics
+       * .ppt, .pptm, .pptx - Microsoft PowerPoint
        */
       {
         name: 'Documents',
@@ -56,18 +57,17 @@ export async function handleFileOpen(_: unknown, filterName = 'Documents', multi
           'epub',
           'hwp',
           'ipynb',
+          'jpeg',
+          'jpg',
+          'mbox',
           'md',
+          'mp3',
+          'mp4',
           'pdf',
-          // 'png',
+          'png',
           'ppt',
           'pptm',
           'pptx',
-          // 'jpeg',
-          // 'jpg',
-          'mbox',
-          // 'mp3',
-          // 'mp4',
-          'txt',
         ],
       },
       { name: 'All', extensions: ['*'] },

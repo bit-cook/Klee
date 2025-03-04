@@ -50,7 +50,7 @@ export default function KnowledgeDetail() {
     })
 
   const handleAddFile = async () => {
-    const filePaths: string[] = await window.ipcRenderer.invoke('dialog:openFile')
+    const filePaths: string[] = await window.ipcRenderer.invoke('dialog:openFile', 'Documents')
     if (!filePaths.length) return
     await mutateCreateVectorsByLocalFilePaths(filePaths)
     queryClient.invalidateQueries({ queryKey: ['vectors', knowledgeId] })
