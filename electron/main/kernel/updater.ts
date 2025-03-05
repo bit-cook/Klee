@@ -112,7 +112,7 @@ const extractor = new Extractor()
 
 function getDatabaseTableName() {
   if (process.env.NODE_ENV === 'development') {
-    return 'service_release_version_dev'
+    return 'service_release_version'
   } else {
     return 'service_release_version'
   }
@@ -159,6 +159,7 @@ async function getServiceVersion(): Promise<ServiceVersion | null> {
   if (data.length === 0) {
     throw new Error(`no service version found for platform: ${platform}`)
   }
+  logger.log('get service version', data[0])
   return data[0]
 }
 

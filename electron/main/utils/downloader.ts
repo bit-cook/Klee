@@ -108,7 +108,7 @@ export class Downloader {
               bytesPerSecond: this.calculateSpeed(this.downloadedBytes),
             },
           }
-          console.log('=========status', status)
+          // console.log('=========status', status)
 
           if (onProgress) {
             onProgress(status)

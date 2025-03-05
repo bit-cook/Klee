@@ -15,11 +15,13 @@ export class Downloader {
 
   private async getFileSize(url: string): Promise<number> {
     try {
+      logger.log('get file size', url)
       const response = await fetch(url, { method: 'HEAD' })
       return parseInt(response.headers.get('content-length') || '0')
     } catch (error) {
       logger.error('get file size failed:', error)
       throw error
+      // return 0
     }
   }
 
