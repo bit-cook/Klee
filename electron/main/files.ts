@@ -48,6 +48,9 @@ export async function handleFileOpen(_: unknown, filterName = 'Documents', multi
        * .pdf - Portable Document Format
        * .png - Portable Network Graphics
        * .ppt, .pptm, .pptx - Microsoft PowerPoint
+       *
+       * Other formats:
+       *  .txt - Plain Text
        */
       {
         name: 'Documents',
@@ -68,6 +71,8 @@ export async function handleFileOpen(_: unknown, filterName = 'Documents', multi
           'ppt',
           'pptm',
           'pptx',
+
+          'txt',
         ],
       },
       { name: 'All', extensions: ['*'] },
