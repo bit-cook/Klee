@@ -3,7 +3,7 @@ import { notarize } from 'electron-notarize'
 import path from 'node:path'
 
 dotenv.config({
-  path: [path.resolve(process.cwd(), '.env.production')],
+  path: [path.resolve(process.cwd(), '.env')],
 })
 
 const _default = async function notarizing(context) {

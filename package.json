@@ -2,7 +2,7 @@
   "name": "klee-electron",
   "productName": "Klee",
   "private": true,
-  "version": "1.4.4",
+  "version": "1.4.5",
   "scripts": {
     "prepare": "husky install",
     "dev": "vite",
