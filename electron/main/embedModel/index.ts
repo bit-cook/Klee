@@ -92,9 +92,9 @@ async function fetchEmbedModelList(): Promise<EmbedModelInfo[]> {
   const { data, error } = await supabase.from('embed_models').select('*')
   if (error) {
     logger.error('[EmbedModel] => fetch embed model list failed', error)
-    return []
+    return [defaultEmbedModelInfo]
   }
-  if (!data) return []
+  if (!data) return [defaultEmbedModelInfo]
   return data
 }
 
@@ -113,7 +113,7 @@ async function fetchModelInfo(name: string) {
   }
   if (!data || data.length === 0) {
     logger.error('[EmbedModel] => model info not found', name)
-    return null
+    return defaultEmbedModelInfo
   }
   return data[0]
 }
