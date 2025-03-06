@@ -23,6 +23,16 @@ interface EmbedModelInfo {
   download_url: string
 }
 
+const defaultEmbedModelInfo = {
+  id: '1d1fad3b-55b1-4702-947c-6197de8d9c0c',
+  name: 'all-MiniLM-L6-v2',
+  description: 'all-MiniLM-L6-v2',
+  weight: 9,
+  download_url: 'https://dvnr1hi9fanyr.cloudfront.net/embedding-models/all-MiniLM-L6-v2.zip',
+  created_at: '2024-11-25T07:50:44.438412+00:00',
+  updated_at: '2024-11-25T07:50:44.438412+00:00',
+}
+
 // Add status update function
 function sendStatusToRenderer(window: BrowserWindow | null, status: IEmbedModelUpdaterStatus) {
   if (!window) return
@@ -59,7 +69,7 @@ async function checkIfModelExist(modelList: EmbedModelInfo[]): Promise<boolean> 
 
     // If model list is empty, return false directly
     if (!modelList || modelList.length === 0) {
-      return true
+      return false
     }
 
     // Get all folders in directory
@@ -78,19 +88,19 @@ async function checkIfModelExist(modelList: EmbedModelInfo[]): Promise<boolean> 
 }
 
 async function fetchEmbedModelList(): Promise<EmbedModelInfo[]> {
-  if (!supabase) return []
+  if (!supabase) return [defaultEmbedModelInfo]
   const { data, error } = await supabase.from('embed_models').select('*')
   if (error) {
     logger.error('[EmbedModel] => fetch embed model list failed', error)
-    return []
+    return [defaultEmbedModelInfo]
   }
-  if (!data) return []
+  if (!data) return [defaultEmbedModelInfo]
   return data
 }
 
 async function fetchModelInfo(name: string) {
   if (!supabase) {
-    return null
+    return defaultEmbedModelInfo
   }
   const { data, error } = await supabase
     .from('embed_models')
@@ -103,7 +113,7 @@ async function fetchModelInfo(name: string) {
   }
   if (!data || data.length === 0) {
     logger.error('[EmbedModel] => model info not found', name)
-    return null
+    return defaultEmbedModelInfo
   }
   return data[0]
 }
@@ -132,10 +142,10 @@ async function downloadEmbedModel(modelInfo: EmbedModelInfo, window: BrowserWind
           downloadProgress: progress,
         })
 
-        logger.info(
-          `[EmbedModel] => downloading ${modelInfo.name}: ${status.downloadProgress.percent.toFixed(2)}%, ` +
-            `${(status.downloadProgress.bytesPerSecond / 1024 / 1024).toFixed(2)} MB/s`,
-        )
+        // logger.info(
+        //   `[EmbedModel] => downloading ${modelInfo.name}: ${status.downloadProgress.percent.toFixed(2)}%, ` +
+        //     `${(status.downloadProgress.bytesPerSecond / 1024 / 1024).toFixed(2)} MB/s`,
+        // )
       }
     })
 

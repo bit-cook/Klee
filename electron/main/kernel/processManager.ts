@@ -1,7 +1,7 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import Logger from 'electron-log/main'
-const logger = Logger.scope('[main] processManager')
+const logger = Logger.scope('[main] kernel processManager')
 
 const execAsync = promisify(exec)
 
@@ -46,6 +46,7 @@ export class ProcessManager {
     try {
       const { stdout } = await execAsync(`lsof -i :${PORT} -t`)
       const pid = stdout.trim()
+      logger.log('findProcessOnMac', pid)
 
       if (!pid) {
         return null
