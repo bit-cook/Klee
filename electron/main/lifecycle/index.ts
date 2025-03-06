@@ -1,4 +1,5 @@
 import { cleanupChildProcess } from '../kernel/executor'
+import { cleanupChildProcess as cleanupOllamaProcess } from '../ollama/exectutor'
 import { app } from 'electron'
 import path from 'path'
 import os from 'os'
@@ -7,36 +8,57 @@ import { getMainWindow, createWindow, getMainWindowOrCreate } from '../window'
 import Logger from 'electron-log/main'
 const logger = Logger.scope('[main] lifecycle')
 
+const cleanupQueue: (() => Promise<void>)[] = []
+
+export async function registerCleanup(cleanup: () => Promise<void>) {
+  if (cleanupQueue.includes(cleanup)) {
+    return
+  }
+  cleanupQueue.push(cleanup)
+}
+
+registerCleanup(cleanupChildProcess)
+registerCleanup(cleanupOllamaProcess)
+
+async function cleanupAll() {
+  while (cleanupQueue.length > 0) {
+    const cleanup = cleanupQueue.shift()
+    if (cleanup) {
+      await cleanup()
+    }
+  }
+}
+
 export const registerLifecycle = () => {
   logger.info('======== registerLifecycle START ========')
 
   app.on('will-quit', () => {
-    logger.info('Application is about to exit')
-    cleanupChildProcess()
+    logger.info('Application will quit')
+    cleanupAll()
   })
 
   app.on('before-quit', () => {
-    logger.info('Application is about to exit')
-    cleanupChildProcess()
+    logger.info('Application before quit')
+    cleanupAll()
   })
 
   // Handle Ctrl+C and similar signals
   process.on('SIGINT', () => {
     logger.info('Received SIGINT signal')
-    cleanupChildProcess()
+    cleanupAll()
     app.quit()
   })
 
   process.on('SIGTERM', () => {
     logger.info('Received SIGTERM signal')
-    cleanupChildProcess()
+    cleanupAll()
     app.quit()
   })
 
   // Handle uncaught exceptions
   process.on('uncaughtException', (err) => {
     logger.info('uncaught exception:', err)
-    cleanupChildProcess()
+    cleanupAll()
     app.quit()
   })
 

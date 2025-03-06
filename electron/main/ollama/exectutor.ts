@@ -2,7 +2,6 @@ import { spawn } from 'child_process'
 import fs from 'fs/promises'
 import { isDev } from '../env'
 import Logger from 'electron-log/main'
-import { processManager } from './processManager'
 const logger = Logger.scope('[main] ollama executor')
 
 let childProcess: ReturnType<typeof spawn> | null = null
@@ -91,8 +90,11 @@ export async function cleanupChildProcess() {
       logger.info('Using childProcess to exit normally')
       await cleanupProcessWithChildProcess()
     } else {
-      logger.info('Using processManager for cleanup')
-      await processManager.cleanup()
+      // don't use processManager for cleanup
+      // logger.info('Using processManager for cleanup')
+      // await processManager.cleanup()
+
+      logger.info("user use self-host ollama, don't need to cleanup")
     }
   } catch (error) {
     Logger.error('Process cleanup failed:', error)
