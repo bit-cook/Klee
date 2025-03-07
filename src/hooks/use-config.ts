@@ -80,7 +80,14 @@ export function useDisconnect() {
   return useAtom(disconnectAtom)
 }
 
-export const ollamaModelsSearchAtom = atom<OllamaModelSearch[]>(OLLAMA_MODELS_SEARCH)
+export const ollamaModelsSearchAtom = atomWithStorage<OllamaModelSearch[]>(
+  'ollamaModelsSearch',
+  OLLAMA_MODELS_SEARCH,
+  undefined,
+  {
+    getOnInit: true,
+  },
+)
 
 export function useOllamaModelsSearch() {
   return useAtom(ollamaModelsSearchAtom)
