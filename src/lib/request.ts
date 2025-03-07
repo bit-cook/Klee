@@ -62,7 +62,7 @@ const requestOptions: Options = {
                 console.log('Network error switching to offline mode')
               }
               resolve(undefined)
-            }, 3_000)
+            }, 10_000)
           }
         })
         if (token) {
