@@ -183,6 +183,9 @@ function getGlobalOllamaPath() {
   }
 }
 
+// Get from environment variables
+const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434'
+
 // 0: Download and start local ollama
 // 1: Start local ollama directly
 // 2: Start global ollama
@@ -190,7 +193,7 @@ function getGlobalOllamaPath() {
 export async function isUpdateAvailable() {
   // Check API directly
   try {
-    await fetch('http://localhost:11434/api/tags')
+    await fetch(`${OLLAMA_BASE_URL}/api/tags`)
     logger.info('use ollama service directly')
     return 3
   } catch (error) {

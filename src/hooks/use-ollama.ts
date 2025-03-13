@@ -2,6 +2,7 @@ import { fetchOllamaModels, fetchOllamaModelsSearch } from '@/services'
 import { ILlmModel, OllamaSearchModel } from '@/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { useConfig } from './use-config'
 
 export function useInvalidateOllamaModels() {
   const queryClient = useQueryClient()
@@ -11,10 +12,15 @@ export function useInvalidateOllamaModels() {
 }
 
 export function useOllamaLlmModels() {
+  const [config] = useConfig()
+  const privateMode = config.privateMode
   return useQuery({
     queryKey: ['ollamaModels'],
-    queryFn: () =>
-      fetchOllamaModels().then((models) => {
+    queryFn: () => {
+      if (privateMode) {
+        return []
+      }
+      return fetchOllamaModels().then((models) => {
         return models.map((model) => {
           const llmModel: ILlmModel = {
             ...model,
@@ -23,11 +29,13 @@ export function useOllamaLlmModels() {
           }
           return llmModel
         })
-      }),
+      })
+    },
     // Infinite retry on failure
     retry: true,
     // Check every two seconds when failing
     retryDelay: 2000,
+    enabled: privateMode,
   })
 }
 
