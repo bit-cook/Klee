@@ -102,26 +102,25 @@ export default function CustomTitleBar() {
   }
 
   const handleConfirm = async () => {
-    setLocalMode(pendingMode)
     try {
       await syncLocalMode(pendingMode)
+      setLocalMode(pendingMode)
+      setShowAlert(false)
+      // If switching to local mode and no models exist, redirect to the guide page
+      // if (pendingMode) {
+      //   const ollamaStatus: 0 | 1 | 2 | 3 = await window.ipcRenderer.invoke('ollama:get-status')
+      //   if (ollamaStatus !== 3) {
+      //     navigate(EnumRouterLink.DownloadingService)
+      //   }
+      // }
+      // reload when local mode is changed
+      // setTimeout(() => {
+      //   window.location.reload()
+      // }, 60)
+      navigate(EnumRouterLink.DownloadingService)
     } catch (error) {
       console.error(error)
     }
-
-    setShowAlert(false)
-    // If switching to local mode and no models exist, redirect to the guide page
-    // if (pendingMode) {
-    //   const ollamaStatus: 0 | 1 | 2 | 3 = await window.ipcRenderer.invoke('ollama:get-status')
-    //   if (ollamaStatus !== 3) {
-    //     navigate(EnumRouterLink.DownloadingService)
-    //   }
-    // }
-    // reload when local mode is changed
-    // setTimeout(() => {
-    //   window.location.reload()
-    // }, 60)
-    navigate(EnumRouterLink.DownloadingService)
   }
 
   const handleClose = () => {
