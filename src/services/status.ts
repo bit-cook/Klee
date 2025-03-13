@@ -4,9 +4,9 @@ export function getHeartbeat() {
   return localRequest.get('base/status').json<{ status: 'OK' }>()
 }
 
+// get /note/synchronize-files
 export function syncFiles() {
-  return
-  // return localRequest.post('base/sync-files').json<{ status: 'OK' }>()
+  return localRequest.get('note/synchronize-files').json<{ status: 'OK' }>()
 }
 
 export function getSyncFilesStatus() {

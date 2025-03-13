@@ -28,11 +28,13 @@ import { DEFAULT_MODEL_LANGUAGE } from '@/constants/languages'
 export function useConversations() {
   const [sortConfig] = useSortConfig()
   const [searchConfig] = useSearchConfig()
+  const [config] = useConfig()
+  const local_mode = config.privateMode ?? true
   const sortBy = sortConfig.sortByField.conversation
   const sortOrder = sortConfig.sortOrderField.conversation
   const keyword = searchConfig.searchByField.conversation
   return useQuery({
-    queryKey: ['conversations', sortBy, sortOrder, keyword],
+    queryKey: ['conversations', sortBy, sortOrder, keyword, local_mode],
     queryFn: () =>
       getConversations({ keyword }).then((conversations) => sortConversations(conversations, sortBy, sortOrder)),
   })
