@@ -40,8 +40,7 @@ import { Button } from '@/components/ui/button'
 import { EnumRouterLink } from '@/constants/paths'
 import { useNavigate } from 'react-router-dom'
 import supabase from '@/lib/supabase/client'
-import { useConversationSettings } from '@/hooks/use-conversation'
-import { getSyncFilesStatus, syncFiles } from '@/services'
+import { getSyncFilesStatus, syncFiles, syncLocalMode } from '@/services'
 import { useQuery } from '@tanstack/react-query'
 
 export default function CustomTitleBar() {
@@ -55,7 +54,7 @@ export default function CustomTitleBar() {
   const setLocalMode = (mode: boolean) => {
     setConfig({ ...config, privateMode: mode })
   }
-  const { reset } = useConversationSettings()
+  // const { reset } = useConversationSettings()
   const routerField = useRouterField()
   const [showAlert, setShowAlert] = useState(false)
   const [pendingMode, setPendingMode] = useState(false)
@@ -105,7 +104,7 @@ export default function CustomTitleBar() {
   const handleConfirm = async () => {
     setLocalMode(pendingMode)
     try {
-      await reset()
+      await syncLocalMode(pendingMode)
     } catch (error) {
       console.error(error)
     }
