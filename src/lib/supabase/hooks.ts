@@ -1,8 +1,6 @@
 import { useSupabaseSession } from '@/pages/SupabaseProvider'
 import { useQuery } from '@tanstack/react-query'
 import supabase from '.'
-import { getFreeChatCount } from '@/services'
-import { useConfig } from '@/hooks/use-config'
 
 export function useUser() {
   const [session] = useSupabaseSession()
@@ -16,13 +14,4 @@ export function useUser() {
 
   if (!session?.user.id) return null
   return user
-}
-
-export function useFreeChatCount() {
-  const [config] = useConfig()
-  return useQuery({
-    queryKey: ['freeChatCount'],
-    queryFn: () => getFreeChatCount(),
-    enabled: !config.privateMode,
-  })
 }

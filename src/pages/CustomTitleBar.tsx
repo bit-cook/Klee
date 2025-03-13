@@ -14,6 +14,7 @@ import {
   Wifi,
   LeafyGreen,
   TreeDeciduous,
+  Loader2,
 } from 'lucide-react'
 import { useOpenInspectorStatus, useOpenNoteInspectorStatus } from '@/hooks/useOpenStatus'
 import { CustomSwitch } from '@/components/CustomSwitch'
@@ -34,12 +35,14 @@ import { useState } from 'react'
 import { usePlatform } from '@/hooks/use-electron'
 import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EnumRouterLink } from '@/constants/paths'
 import { useNavigate } from 'react-router-dom'
 import supabase from '@/lib/supabase/client'
+import { useConversationSettings } from '@/hooks/use-conversation'
+import { getSyncFilesStatus, syncFiles } from '@/services'
+import { useQuery } from '@tanstack/react-query'
 
 export default function CustomTitleBar() {
   const { t } = useTranslation()
@@ -47,12 +50,12 @@ export default function CustomTitleBar() {
   const [isOpen, setIsOpen] = useOpenInspectorStatus()
   const [isOpenNote, setIsOpenNote] = useOpenNoteInspectorStatus()
   // const { local_mode } = useConversationSettings()
-  const [config] = useConfig()
+  const [config, setConfig] = useConfig()
   const local_mode = config.privateMode ?? true
-  const [, setConfig] = useConfig()
-  const setLocalMode = (privateMode: boolean) => {
-    setConfig((config) => ({ ...config, privateMode }))
+  const setLocalMode = (mode: boolean) => {
+    setConfig({ ...config, privateMode: mode })
   }
+  const { reset } = useConversationSettings()
   const routerField = useRouterField()
   const [showAlert, setShowAlert] = useState(false)
   const [pendingMode, setPendingMode] = useState(false)
@@ -101,6 +104,8 @@ export default function CustomTitleBar() {
 
   const handleConfirm = async () => {
     setLocalMode(pendingMode)
+    await reset()
+
     setShowAlert(false)
     // If switching to local mode and no models exist, redirect to the guide page
     if (pendingMode) {
@@ -110,9 +115,6 @@ export default function CustomTitleBar() {
       }
     }
     // reload when local mode is changed
-    setTimeout(() => {
-      window.location.reload()
-    }, 50)
   }
 
   const handleClose = () => {
@@ -120,6 +122,25 @@ export default function CustomTitleBar() {
     setTimeout(() => {
       setShowDetail(false)
     }, 600)
+  }
+
+  const { data: syncStatus, refetch: refetchSyncStatus } = useQuery({
+    queryKey: ['syncStatus'],
+    queryFn: () => getSyncFilesStatus(),
+  })
+  const [isSyncing, setIsSyncing] = useState(false)
+  const handleSync = async () => {
+    setIsSyncing(true)
+    try {
+      const res = await syncFiles()
+      console.log(res)
+      await refetchSyncStatus()
+      setIsSyncing(false)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsSyncing(false)
+    }
   }
 
   return (
@@ -141,13 +162,20 @@ export default function CustomTitleBar() {
             platform === 'darwin' ? 'pr-4' : 'pr-36',
           )}
         >
+          {/* sync btn */}
+          {!local_mode && (
+            <Button variant={'ghost'} size="icon" className="h-5 w-auto px-2" onClick={handleSync}>
+              {t('titleBar.sync')}
+              {isSyncing && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+            </Button>
+          )}
           {routerField.note && (
             <>
               <LucidePanelRight
                 className="h-5 w-5 cursor-pointer text-titlebar-foreground hover:bg-transparent hover:text-titlebar-foreground-selected"
                 onClick={() => setIsOpenNote(!isOpenNote)}
               />
-              <Badge>Dev</Badge>
+              {/* <Badge>Dev</Badge> */}
             </>
           )}
           {(routerField.conversationDetail || routerField.conversation) && (

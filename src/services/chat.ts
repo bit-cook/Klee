@@ -1,9 +1,8 @@
 // Reference: https://github.com/Azure/fetch-event-source/blob/main/src/fetch.ts
 import { localRequest } from '@/lib/request'
-import { IConversation, IFetchEventSourceInit, IFetchFreeMessageCountResponse } from '@/types'
+import { IConversation, IFetchEventSourceInit } from '@/types'
 import { getBytes, getLines, getMessages } from '@/lib/parse'
 import { KyHeadersInit } from 'ky/distribution/types/options'
-import supabase from '@/lib/supabase'
 
 const LastEventId = 'last-event-id'
 
@@ -44,25 +43,5 @@ export async function chatStream(
     )
   } catch (error) {
     onerror?.(error as Error)
-  }
-}
-
-// get free chat count
-export async function getFreeChatCount(): Promise<number> {
-  try {
-    if (!supabase) return 0
-    const { data, error } = await supabase.functions.invoke<IFetchFreeMessageCountResponse>(
-      'userService-fetchFreeMessageCount',
-    )
-    if (error) {
-      throw error
-    }
-    if (!data) {
-      throw new Error('get free chat count failed.')
-    }
-    return data.count
-  } catch (error) {
-    console.error(error)
-    return 0
   }
 }

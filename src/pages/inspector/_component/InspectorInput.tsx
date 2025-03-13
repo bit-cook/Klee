@@ -15,8 +15,8 @@ import { IConversationDetail } from '@/types'
 import { createConversation, generateConversationTitle } from '@/services'
 import { useScrollToBottom } from '@/hooks/use-scroll'
 import { useConfig } from '@/hooks/use-config'
-import { useFreeChatCount } from '@/lib/supabase/hooks'
-import { useShowFreeChatCount, useUpgradeAlert, useIsPremium } from '@/hooks/use-subscription'
+
+import { useUpgradeAlert, useIsPremium } from '@/hooks/use-subscription'
 import { toast } from 'sonner'
 
 // TODO: Unify conversation input logic
@@ -34,12 +34,9 @@ export default function InspectorInput({ className }: { className?: string }) {
   const { setAutoScroll } = useScrollToBottom()
   const textAreaRef = useRef<AutosizeTextAreaRef | null>(null)
   const [isComposing, setIsComposing] = useState(false)
-  const { data: freeChatCount, refetch: refetchFreeChatCount } = useFreeChatCount()
   const [, setUpgradeAlert] = useUpgradeAlert()
   const [config] = useConfig()
   const isCloudMode = !config.privateMode
-  const [isLoading, setIsLoading] = useState(false)
-  const showFreeChatCount = useShowFreeChatCount()
   const isPremium = useIsPremium()
 
   useEffect(() => {
@@ -120,12 +117,7 @@ export default function InspectorInput({ className }: { className?: string }) {
 
       // Update free chat count
       if (!isPremium && isCloudMode) {
-        refetchFreeChatCount().then((query) => {
-          const count = query.data
-          if (count === 0 && isCloudMode) {
-            setUpgradeAlert(true)
-          }
-        })
+        setUpgradeAlert(true)
       }
     },
     onError: (data) => {
@@ -150,12 +142,7 @@ export default function InspectorInput({ className }: { className?: string }) {
 
       // Update free chat count
       if (!isPremium && isCloudMode) {
-        refetchFreeChatCount().then((query) => {
-          const count = query.data
-          if (count === 0 && isCloudMode) {
-            setUpgradeAlert(true)
-          }
-        })
+        setUpgradeAlert(true)
       }
     },
   })
@@ -179,8 +166,7 @@ export default function InspectorInput({ className }: { className?: string }) {
     const trimmedMessage = message.trim()
     if (!trimmedMessage) return
     if (!isPremium) {
-      if (typeof freeChatCount === 'undefined') return
-      if (freeChatCount === 0 && isCloudMode) {
+      if (isCloudMode) {
         setUpgradeAlert(true)
         return
       }
@@ -257,15 +243,10 @@ export default function InspectorInput({ className }: { className?: string }) {
         onKeyDown={handleKeyDown}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
-        disabled={isLoading || isPending}
+        disabled={isPending}
         maxHeight={24 * 6}
         className="text-foreground"
       />
-      {showFreeChatCount && (
-        <div className="text-end text-sm text-muted-foreground">
-          {t('chat.freeChatCount', { count: freeChatCount || 0 })}
-        </div>
-      )}
       <InspectorSettings />
     </div>
   )

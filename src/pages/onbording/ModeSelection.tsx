@@ -25,7 +25,7 @@ import { useConfig, useIsIntro } from '@/hooks/use-config'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
-import { useFreeChatCount, useUser } from '@/lib/supabase/hooks'
+import { useUser } from '@/lib/supabase/hooks'
 import { useSubscription } from '@/hooks/use-subscription'
 import supabase from '@/lib/supabase/client'
 
@@ -84,8 +84,6 @@ export default function ModeSelection() {
     }
   }
 
-  const { data: freeChatCount } = useFreeChatCount()
-
   useEffect(() => {
     if (!isConfirming) return
 
@@ -102,7 +100,7 @@ export default function ModeSelection() {
       setIsConfirming(false)
       setSelectedMode('local')
     }
-  }, [config, isConfirming, navigate, setConfig, setIsIntro, subscription, user, freeChatCount])
+  }, [config, isConfirming, navigate, setConfig, setIsIntro, subscription, user])
 
   const handleContinue = () => {
     const privateMode = selectedMode === 'local'

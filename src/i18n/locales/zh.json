@@ -315,7 +315,8 @@
     "switchToCloudMode": "切换到云端模式？",
     "localModeDescription": "在本地运行所有模型，不会将数据发送到云端",
     "cloudModeDescription": "使用云端提供商的高级模型，如 OpenAI、Anthropic",
-    "noModel": "缺少默认模型，确认将跳转至引导页"
+    "noModel": "缺少默认模型，确认将跳转至引导页",
+    "sync": "同步"
   },
   "auth": {
     "sendConfirmationEmailError": "发送确认邮件错误",
