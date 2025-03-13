@@ -188,6 +188,10 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
       },
       conversation,
     )
+    console.log(
+      '[renderer] -> useConversationSettings -> handleConversationSettingsChange',
+      JSON.stringify(newConversation),
+    )
     return updateConversationSettings(id, newConversation).then((data) => {
       queryClient.setQueryData(['conversation', id], (oldConversationDetail: { conversation: IConversation }) => {
         return {

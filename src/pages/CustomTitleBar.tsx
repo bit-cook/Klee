@@ -104,7 +104,11 @@ export default function CustomTitleBar() {
 
   const handleConfirm = async () => {
     setLocalMode(pendingMode)
-    await reset()
+    try {
+      await reset()
+    } catch (error) {
+      console.error(error)
+    }
 
     setShowAlert(false)
     // If switching to local mode and no models exist, redirect to the guide page
@@ -115,6 +119,9 @@ export default function CustomTitleBar() {
       }
     }
     // reload when local mode is changed
+    setTimeout(() => {
+      window.location.reload()
+    }, 60)
   }
 
   const handleClose = () => {

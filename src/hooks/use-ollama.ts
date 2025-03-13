@@ -15,9 +15,9 @@ export function useOllamaLlmModels() {
   const [config] = useConfig()
   const privateMode = config.privateMode
   return useQuery({
-    queryKey: ['ollamaModels'],
+    queryKey: ['ollamaModels', privateMode],
     queryFn: () => {
-      if (privateMode) {
+      if (!privateMode) {
         return []
       }
       return fetchOllamaModels().then((models) => {
@@ -35,7 +35,6 @@ export function useOllamaLlmModels() {
     retry: true,
     // Check every two seconds when failing
     retryDelay: 2000,
-    enabled: privateMode,
   })
 }
 
