@@ -93,26 +93,6 @@ export default function GeneralSetting() {
             </SelectContent>
           </Select>
         </div>
-        {/* Model Language */}
-        <Separator />
-        <div className="flex h-10 items-center justify-between">
-          {/* <div className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            <Label htmlFor="language">{t('inspector.replyLanguage')}</Label>
-          </div> */}
-          <Select value={defaultModelLanguage?.id} onValueChange={setModelLanguage}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {modelLanguages.map((lang) => (
-                <SelectItem key={lang.id} value={lang.id}>
-                  {lang.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
         {/* <Separator /> */}
         {/* Font Size */}
         {/* <div className="flex items-center justify-between h-10">

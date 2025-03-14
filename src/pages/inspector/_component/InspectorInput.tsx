@@ -12,7 +12,7 @@ import { useChatStream } from '@/hooks/use-chat'
 import { useConversationDetailById, useConversationSettingsById } from '@/hooks/use-conversation'
 import { createNewDefaultConversationParams, createNewMessage } from '@/services/helper'
 import { IConversationDetail } from '@/types'
-import { createConversation } from '@/services'
+import { createConversation, updateConversationTitle } from '@/services'
 import { useScrollToBottom } from '@/hooks/use-scroll'
 import { useConfig } from '@/hooks/use-config'
 
@@ -104,20 +104,14 @@ export default function InspectorInput({ className }: { className?: string }) {
         textAreaRef.current?.textArea?.focus()
       }, 300)
 
-      // if (!conversation?.title && !isGeneratingTitle) {
-      //   console.log(`Title judgment: ${JSON.stringify(conversation)} |\n ${isGeneratingTitle}`)
-      //   setIsGeneratingTitle(true)
-      //   generateConversationTitle(data.conversation_id).then(() => {
-      //     // TODO: Optimize to only refresh title data
-      //     queryClient.invalidateQueries({ queryKey: ['conversations'] })
-      //     queryClient.invalidateQueries({ queryKey: ['conversation', data.conversation_id] })
-      //     setIsGeneratingTitle(false)
-      //   })
-      // }
-
-      // Update free chat count
-      if (!isPremium && isCloudMode) {
-        setUpgradeAlert(true)
+      if (!conversation?.title && !isGeneratingTitle) {
+        //   console.log(`Title judgment: ${JSON.stringify(conversation)} |\n ${isGeneratingTitle}`)
+        setIsGeneratingTitle(true)
+        updateConversationTitle(data.conversation_id, data.userMessage.content).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['conversations'] })
+          queryClient.invalidateQueries({ queryKey: ['conversation', data.conversation_id] })
+          setIsGeneratingTitle(false)
+        })
       }
     },
     onError: (data) => {
