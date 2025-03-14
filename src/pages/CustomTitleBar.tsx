@@ -40,8 +40,7 @@ import { Button } from '@/components/ui/button'
 import { EnumRouterLink } from '@/constants/paths'
 import { useNavigate } from 'react-router-dom'
 import supabase from '@/lib/supabase/client'
-import { getSyncFilesStatus, syncFiles, syncLocalMode } from '@/services'
-import { useQuery } from '@tanstack/react-query'
+import { syncFiles, syncLocalMode } from '@/services'
 
 export default function CustomTitleBar() {
   const { t } = useTranslation()
@@ -130,17 +129,17 @@ export default function CustomTitleBar() {
     }, 600)
   }
 
-  const { data: syncStatus, refetch: refetchSyncStatus } = useQuery({
-    queryKey: ['syncStatus'],
-    queryFn: () => getSyncFilesStatus(),
-  })
+  // const { data: syncStatus, refetch: refetchSyncStatus } = useQuery({
+  //   queryKey: ['syncStatus'],
+  //   queryFn: () => getSyncFilesStatus(),
+  // })
   const [isSyncing, setIsSyncing] = useState(false)
   const handleSync = async () => {
     setIsSyncing(true)
     try {
       const res = await syncFiles()
       console.log(res)
-      await refetchSyncStatus()
+      // await refetchSyncStatus()
       setIsSyncing(false)
     } catch (error) {
       console.error(error)
@@ -169,7 +168,7 @@ export default function CustomTitleBar() {
           )}
         >
           {/* sync btn */}
-          {!local_mode && (
+          {!local_mode && !routerField.onboarding && (
             <Button variant={'ghost'} size="icon" className="h-5 w-auto px-2" onClick={handleSync}>
               {t('titleBar.sync')}
               {isSyncing && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}

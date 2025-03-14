@@ -77,3 +77,12 @@ export interface OllamaProgressResponse {
   progress?: ProgressResponse
   error?: string
 }
+
+export interface IOllamaVersionInfo {
+  version: string
+  darwin_url?: string
+  windows_url?: string
+  linux_url?: string
+  release_date?: string
+  release_notes?: string
+}

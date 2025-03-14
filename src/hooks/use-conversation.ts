@@ -21,10 +21,11 @@ import {
 } from '@/hooks/use-llm'
 
 import { useModelLanguages, useDefaultModelLanguage } from '@/hooks/use-language'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useConfig, useSearchConfig, useSortConfig } from './use-config'
 import { sortConversations } from '@/services/helper'
 import { DEFAULT_MODEL_LANGUAGE } from '@/constants/languages'
+import { EnumRouterLink } from '@/constants/paths'
 
 export function useConversations() {
   const [sortConfig] = useSortConfig()
@@ -100,9 +101,17 @@ export function useConversationDetail() {
 }
 
 export function useConversationDetailById({ id = '' }: { id?: IConversation['id'] }) {
+  const navigate = useNavigate()
   return useQuery({
     queryKey: ['conversation', id],
-    queryFn: () => getConversationWithMessages(id),
+    queryFn: () =>
+      getConversationWithMessages(id).then((data) => {
+        // If the conversation is not found, navigate to the new conversation page
+        if (!data.conversation) {
+          navigate(EnumRouterLink.ConversationNew)
+        }
+        return data
+      }),
     enabled: !!id,
   })
 }
@@ -320,8 +329,13 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
 
 // update conversation title
 export function useUpdateConversationTitle() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ conversationId, title }: { conversationId: IConversation['id']; title: string }) =>
       updateConversationTitle(conversationId, title),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({ queryKey: ['conversationsByNoteId'] })
+    },
   })
 }

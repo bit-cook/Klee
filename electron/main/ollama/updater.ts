@@ -1,6 +1,6 @@
 import { Downloader } from '../utils/downloader'
 import Logger from 'electron-log/main'
-import { ollamaExecutablePath, ollamaExtractDestinationPath, ollamaSavedPath } from '../appPath'
+import { ollamaExecutablePath, ollamaExtractDestinationPath, ollamaSavedPath, ollamaVersionFilePath } from '../appPath'
 import { getMainWindow } from '../window'
 import { extractAndRunProgram } from './exectutor'
 import { Extractor } from './extractor'
@@ -9,6 +9,8 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import fs from 'fs'
 import path from 'path'
+import { IOllamaVersionInfo } from 'electron/types'
+import yaml from 'js-yaml'
 
 const logger = Logger.scope('[main] ollama')
 
@@ -17,9 +19,96 @@ const extractor = new Extractor()
 const downloader = new Downloader()
 const DARWIN_DOWNLOAD_URL = 'https://dvnr1hi9fanyr.cloudfront.net/ollama/ollama-darwin.tgz'
 const WINDOWS_DOWNLOAD_URL = 'https://dvnr1hi9fanyr.cloudfront.net/ollama/ollama-windows-amd64.zip'
+const VERSION_CHECK_URL = 'https://dvnr1hi9fanyr.cloudfront.net/ollama/version.yml'
 const downloadUrl = process.platform === 'darwin' ? DARWIN_DOWNLOAD_URL : WINDOWS_DOWNLOAD_URL
 
-async function downloadService() {
+async function getRemoteVersionInfo(): Promise<IOllamaVersionInfo | null> {
+  try {
+    logger.info(`Checking remote version from: ${VERSION_CHECK_URL}`)
+    const response = await fetch(VERSION_CHECK_URL)
+
+    if (!response.ok) {
+      logger.error(`Failed to fetch version info: ${response.status} ${response.statusText}`)
+      return null
+    }
+
+    const yamlText = await response.text()
+    const versionInfo = yaml.load(yamlText) as IOllamaVersionInfo
+
+    logger.info(`Remote version info: ${JSON.stringify(versionInfo)}`)
+    return versionInfo
+  } catch (error) {
+    logger.error('Failed to get remote version info', error)
+    return null
+  }
+}
+
+async function getLocalVersionInfo(): Promise<IOllamaVersionInfo | null> {
+  try {
+    if (!fs.existsSync(ollamaVersionFilePath)) {
+      logger.info(`Local version file not found: ${ollamaVersionFilePath}`)
+      return null
+    }
+
+    const versionData = await fs.promises.readFile(ollamaVersionFilePath, 'utf-8')
+    const versionInfo = JSON.parse(versionData) as IOllamaVersionInfo
+
+    logger.info(`Local version info: ${JSON.stringify(versionInfo)}`)
+    return versionInfo
+  } catch (error) {
+    logger.error('Failed to get local version info', error)
+    return null
+  }
+}
+
+async function saveLocalVersionInfo(versionInfo: IOllamaVersionInfo): Promise<void> {
+  try {
+    // Ensure directory exists
+    const dirPath = path.dirname(ollamaVersionFilePath)
+    if (!fs.existsSync(dirPath)) {
+      await fs.promises.mkdir(dirPath, { recursive: true })
+    }
+
+    await fs.promises.writeFile(ollamaVersionFilePath, JSON.stringify(versionInfo, null, 2), 'utf-8')
+    logger.info(`Saved local version info: ${JSON.stringify(versionInfo)}`)
+  } catch (error) {
+    logger.error('Failed to save local version info', error)
+    throw error
+  }
+}
+
+async function isUpdateRequired(): Promise<{ needUpdate: boolean; remoteVersion: IOllamaVersionInfo | null }> {
+  const remoteVersion = await getRemoteVersionInfo()
+  const localVersion = await getLocalVersionInfo()
+
+  if (!remoteVersion) {
+    logger.info('No remote version info available, skipping update check')
+    return { needUpdate: false, remoteVersion: null }
+  }
+
+  if (!localVersion) {
+    logger.info('No local version info available, update required')
+    return { needUpdate: true, remoteVersion }
+  }
+
+  const needUpdate = remoteVersion.version !== localVersion.version
+  logger.info(`Update check: local=${localVersion.version}, remote=${remoteVersion.version}, needUpdate=${needUpdate}`)
+
+  return { needUpdate, remoteVersion }
+}
+
+async function getDownloadUrlFromVersion(versionInfo: IOllamaVersionInfo): Promise<string> {
+  if (process.platform === 'darwin' && versionInfo.darwin_url) {
+    return versionInfo.darwin_url
+  } else if (process.platform === 'win32' && versionInfo.windows_url) {
+    return versionInfo.windows_url
+  }
+
+  // Fallback to default URLs if specific ones are not provided
+  return process.platform === 'darwin' ? DARWIN_DOWNLOAD_URL : WINDOWS_DOWNLOAD_URL
+}
+
+async function downloadService(downloadUrl: string) {
   try {
     logger.info(`start download file: ${downloadUrl}`)
     logger.info(`download target path: ${ollamaSavedPath}`)
@@ -221,39 +310,104 @@ export async function handleOllamaUpdater() {
   try {
     getMainWindow()?.webContents.send('ollama-updater-status-change', {
       status: 'checking',
+      message: 'Checking Ollama installation and version...',
     })
 
     const available = await isUpdateAvailable()
     logger.info('ollama updater available', available)
-    if (available === 0) {
+
+    if (available === 0 || available === 1) {
+      // Check if update is required
       getMainWindow()?.webContents.send('ollama-updater-status-change', {
-        status: 'downloading',
+        status: 'checking',
+        message: 'Checking for Ollama updates...',
       })
 
-      // Download ollama
-      const downloadedPath = await downloadService()
+      const { needUpdate, remoteVersion } = await isUpdateRequired()
 
-      getMainWindow()?.webContents.send('ollama-updater-status-change', {
-        status: 'extracting',
-      })
-      await extractService(downloadedPath)
+      if (remoteVersion) {
+        getMainWindow()?.webContents.send('ollama-updater-status-change', {
+          status: 'checking',
+          message: `Found remote version: ${remoteVersion.version}${
+            needUpdate ? ' (update available)' : ' (up to date)'
+          }`,
+        })
+      }
 
-      getMainWindow()?.webContents.send('ollama-updater-status-change', {
-        status: 'running',
-      })
+      // 如果是 available === 1 且不需要更新，直接启动本地服务
+      if (available === 1 && !needUpdate) {
+        getMainWindow()?.webContents.send('ollama-updater-status-change', {
+          status: 'running',
+          message: 'Running local Ollama',
+        })
 
-      // Start the program
-      await extractAndRunProgram(ollamaExecutablePath)
-    } else if (available === 1) {
-      getMainWindow()?.webContents.send('ollama-updater-status-change', {
-        status: 'running',
-      })
+        // Start the program
+        await extractAndRunProgram(ollamaExecutablePath)
+      }
+      // 如果需要更新或者 available === 0（需要下载）
+      else if (needUpdate || available === 0) {
+        if (remoteVersion) {
+          getMainWindow()?.webContents.send('ollama-updater-status-change', {
+            status: 'downloading',
+            message: `Downloading Ollama version ${remoteVersion.version}`,
+          })
 
-      // Start the program
-      await extractAndRunProgram(ollamaExecutablePath)
+          // Get download URL from version info
+          const versionSpecificUrl = await getDownloadUrlFromVersion(remoteVersion)
+
+          // Download ollama
+          const downloadedPath = await downloadService(versionSpecificUrl)
+
+          getMainWindow()?.webContents.send('ollama-updater-status-change', {
+            status: 'extracting',
+            message: `Extracting Ollama version ${remoteVersion.version}`,
+          })
+          await extractService(downloadedPath)
+
+          // Save version info after successful extraction
+          await saveLocalVersionInfo(remoteVersion)
+
+          getMainWindow()?.webContents.send('ollama-updater-status-change', {
+            status: 'running',
+            message: `Running Ollama version ${remoteVersion.version}`,
+          })
+
+          // Start the program
+          await extractAndRunProgram(ollamaExecutablePath)
+        } else {
+          // No version info available, but still need to download
+          getMainWindow()?.webContents.send('ollama-updater-status-change', {
+            status: 'downloading',
+            message: 'Downloading Ollama (no version info available)',
+          })
+
+          // Download ollama using default URL
+          const downloadedPath = await downloadService(downloadUrl)
+
+          getMainWindow()?.webContents.send('ollama-updater-status-change', {
+            status: 'extracting',
+            message: 'Extracting Ollama',
+          })
+          await extractService(downloadedPath)
+
+          getMainWindow()?.webContents.send('ollama-updater-status-change', {
+            status: 'running',
+            message: 'Running Ollama',
+          })
+
+          // Start the program
+          await extractAndRunProgram(ollamaExecutablePath)
+        }
+      }
     } else if (available === 2) {
       getMainWindow()?.webContents.send('ollama-updater-status-change', {
+        status: 'checking',
+        message: 'Found global Ollama installation',
+      })
+
+      getMainWindow()?.webContents.send('ollama-updater-status-change', {
         status: 'running',
+        message: 'Running global Ollama',
       })
 
       // Start the program
@@ -264,16 +418,29 @@ export async function handleOllamaUpdater() {
       } else {
         throw new Error('global ollama path not found')
       }
+    } else if (available === 3) {
+      getMainWindow()?.webContents.send('ollama-updater-status-change', {
+        status: 'checking',
+        message: 'Ollama service is already running',
+      })
+
+      getMainWindow()?.webContents.send('ollama-updater-status-change', {
+        status: 'completed',
+        message: 'Using existing Ollama service',
+      })
+      return
     }
 
     getMainWindow()?.webContents.send('ollama-updater-status-change', {
       status: 'completed',
+      message: 'Ollama setup completed',
     })
   } catch (error) {
     logger.error('check update service failed', error)
     getMainWindow()?.webContents.send('ollama-updater-status-change', {
       status: 'error',
       error,
+      message: `Ollama setup failed: ${error instanceof Error ? error.message : String(error)}`,
     })
   }
 }

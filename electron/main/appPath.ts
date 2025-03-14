@@ -61,6 +61,9 @@ logger.info('embedModelFolderPath:', embedModelFolderPath)
 export const downloadEmbedModelDestinationPath = getDownloadEmbedModelDestinationPath()
 logger.info('downloadEmbedModelDestinationPath:', downloadEmbedModelDestinationPath)
 
+export const ollamaVersionFilePath = getOllamaVersionFilePath()
+logger.info('ollamaVersionFilePath:', ollamaVersionFilePath)
+
 function getAppFolder(foldername: string) {
   if (process.platform === 'win32') {
     // return path.join(app.getPath('userData'), '../..', '/Local/com/signer_labs/klee', foldername)
@@ -216,11 +219,20 @@ function getEmbedModelFolderPath() {
     return path.join(app.getAppPath(), '../../../', 'klee-kernel/embed_model')
   }
 }
+
 function getDownloadEmbedModelDestinationPath() {
   if (process.platform === 'darwin') {
     return path.join(getAppFolder(''), 'temp')
   } else {
     return path.join(app.getAppPath(), '../../../', 'klee-kernel/version')
+  }
+}
+
+function getOllamaVersionFilePath() {
+  if (process.platform === 'darwin') {
+    return path.join(getAppFolder(''), 'ollama-latest/version.json')
+  } else {
+    return path.join(app.getAppPath(), '../../../', 'klee-ollama/version.json')
   }
 }
 
