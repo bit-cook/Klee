@@ -148,10 +148,10 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
   const selectedProvider = local_mode ? selectedPrivateProvider : _selectedProvider
 
   // Currently selected model
-  const _selectedModel = useLlmModel(conversationDetail?.conversation.model_id || '') || _defaultLlmProvider?.models[0]
+  const _selectedModel = useLlmModel(conversationDetail?.conversation?.model_id || '') || _defaultLlmProvider?.models[0]
   // For klee models, only select enabled ones
   const selectedPrivateModel =
-    usePrivateLlmModel(conversationDetail?.conversation.model_id || '') ||
+    usePrivateLlmModel(conversationDetail?.conversation?.model_id || '') ||
     (defaultPrivateLlmProvider?.id === 'klee'
       ? defaultPrivateLlmProvider.models.find((model) => !model.disabled)
       : defaultPrivateLlmProvider?.models[0])
@@ -160,9 +160,9 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
   // const conversationProvider = useLlmProvider(oldConversation?.provider_id || '')
   // const conversationModel = useLlmModel(oldConversation?.model_id || '')
 
-  // const _selectedModel = useLlmModel(conversationDetail?.conversation.model_id || '') || _defaultLlmModel
+  // const _selectedModel = useLlmModel(conversationDetail?.conversation?.model_id || '') || _defaultLlmModel
   // const selectedPrivateModel =
-  //   usePrivateLlmModel(conversationDetail?.conversation.model_id || '') || defaultPrivateLlmModel
+  //   usePrivateLlmModel(conversationDetail?.conversation?.model_id || '') || defaultPrivateLlmModel
 
   const languages = useModelLanguages()
   const defaultLanguage = useDefaultModelLanguage()
