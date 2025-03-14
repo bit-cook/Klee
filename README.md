@@ -5,27 +5,17 @@
 </div>
 
 # Klee
-Secure and local AI on your desktop with a built-in RAG knowledge base and Markdown note support.
+Klee brings secure and local AI to your desktop with built-in RAG knowledge base and Markdown note. You can use local mode without any internet connection to protect your privacy.
 
-Like Klee? Give it a star 🌟, visit our [Website](https://kleedesktop.com/) or join our [Discord](https://discord.gg/ZwMbWtVuNS).
-
-## 🌠 Screenshot
-
-### Download and run open-source LLMs on your desktop
-![Klee Screenshot](public/new.png)
-
-### Off line usage with ZERO data collection
-![Klee Screenshot](public/chat.png)
-
-### Built-in markdown notes
-![Klee Screenshot](public/note.png)
-
-### File & folder knowledge base
-![Klee Screenshot](public/knowledge.png)
+You can download the latest version from our [Website](https://kleedesktop.com/) or join our [Discord](https://discord.gg/ZwMbWtVuNS) if you need any support.
 
 At its core, Klee is built on:
 - <u>[Ollama](https://ollama.com/)</u>: For running local LLMs quickly and efficiently.
 - <u>[LlamaIndex](https://www.llamaindex.ai/)</u>: As the data framework.
+
+## 🌠 Demo
+
+![Klee Screenshot](public/kleedemo.GIF)
 
 ## 🤝 Contributing
 We warmly welcome contributions to Klee! Here are some ways you can get involved:
