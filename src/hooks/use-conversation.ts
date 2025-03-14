@@ -3,6 +3,7 @@ import {
   getConversations,
   getConversationWithMessages,
   updateConversationSettings,
+  updateConversationTitle,
 } from '@/services'
 import { IConversation, IConversationSettings, ILlmModel, ILlmProvider, IModelLanguage, INote } from '@/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -315,4 +316,12 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
   // console.log('[renderer] -> useConversationSettings', JSON.stringify(data))
 
   return data
+}
+
+// update conversation title
+export function useUpdateConversationTitle() {
+  return useMutation({
+    mutationFn: ({ conversationId, title }: { conversationId: IConversation['id']; title: string }) =>
+      updateConversationTitle(conversationId, title),
+  })
 }

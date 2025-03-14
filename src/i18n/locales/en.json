@@ -40,7 +40,8 @@
     "skip": "Skip",
     "continue": "Continue",
     "back": "Back",
-    "resume": "Resume"
+    "resume": "Resume",
+    "save": "Save"
   },
   "settings": {
     "title": "Settings",
@@ -153,7 +154,10 @@
     "newKnowledge": "New Knowledge",
     "newKnowledgeDescription": "Knowledge base description...",
     "newNote": "New Note",
-    "newNoteDescription": "Write down yours thoughts..."
+    "newNoteDescription": "Write down yours thoughts...",
+    "updateTitle": "Update Title",
+    "enterNewTitle": "Enter new title",
+    "titlePlaceholder": "Type your new title here."
   },
   "knowledge": {
     "newKnowledge": "New Knowledge",

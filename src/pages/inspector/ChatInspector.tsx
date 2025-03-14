@@ -24,7 +24,7 @@ import { ListSwitcher } from '@/components/ListSwitcher'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useConversationDetail, useConversationSettings } from '@/hooks/use-conversation'
-import { IBaseCheckOption, IBaseOption, IModelLanguage } from '@/types'
+import { IBaseCheckOption, IBaseOption } from '@/types'
 import { useParams } from 'react-router-dom'
 import { useOllamaLlmModels } from '@/hooks/use-ollama'
 import { useRefetchLocalLlmModel } from '@/hooks/use-llm'
@@ -252,12 +252,12 @@ function ModelSetting() {
             {local_mode && selectedProvider?.id === 'local' && (
               <ListChooser label={t('inspector.path')} value={selectedModel?.path} onChoose={refetchLocalLlmModel} />
             )}
-            <ListSelector
+            {/* <ListSelector
               label={t('inspector.replyLanguage')}
               options={languages}
               value={selectedLanguageId}
               onValueChange={(value) => setSelectedLanguageId(value as IModelLanguage['id'])}
-            />
+            /> */}
             <div className="flex flex-col gap-4">
               <Label htmlFor="prompt">{t('inspector.systemPrompt')}</Label>
               <Textarea

@@ -43,3 +43,7 @@ export async function updateConversationSettings(
 export function generateConversationTitle(id: IConversation['id']) {
   return localRequest.post(`chat/conversation/title/${id}`).json<IConversation>()
 }
+
+export function updateConversationTitle(id: IConversation['id'], title: string) {
+  return localRequest.put(`base/conversation/setting`, { json: { id, title } }).json<IConversation>()
+}

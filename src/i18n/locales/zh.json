@@ -40,7 +40,8 @@
     "skip": "跳过",
     "continue": "继续",
     "resume": "恢复",
-    "back": "返回"
+    "back": "返回",
+    "save": "保存"
   },
   "settings": {
     "title": "设置",
@@ -153,7 +154,10 @@
     "newKnowledge": "新的知识库",
     "newKnowledgeDescription": "知识库描述...",
     "newNote": "新的笔记",
-    "newNoteDescription": "写下你的想法..."
+    "newNoteDescription": "写下你的想法...",
+    "updateTitle": "更新标题",
+    "enterNewTitle": "输入新的标题",
+    "titlePlaceholder": "输入你的新标题"
   },
   "knowledge": {
     "newKnowledge": "新的知识库",

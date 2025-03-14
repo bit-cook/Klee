@@ -6,7 +6,7 @@ import Discord from '@/assets/social-media/discord.png'
 import X from '@/assets/social-media/x.png'
 import Ins from '@/assets/social-media/ins.png'
 import RedBook from '@/assets/social-media/redBook.png'
-import { PackageCheck, Users, Laptop, MessageSquare, Languages, Database } from 'lucide-react'
+import { PackageCheck, Users, Laptop, MessageSquare, Languages } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -96,10 +96,10 @@ export default function GeneralSetting() {
         {/* Model Language */}
         <Separator />
         <div className="flex h-10 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
+          {/* <div className="flex items-center gap-2">
+            <Database className="w-4 h-4" />
             <Label htmlFor="language">{t('inspector.replyLanguage')}</Label>
-          </div>
+          </div> */}
           <Select value={defaultModelLanguage?.id} onValueChange={setModelLanguage}>
             <SelectTrigger className="w-[120px]">
               <SelectValue />

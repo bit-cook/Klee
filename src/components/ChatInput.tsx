@@ -6,7 +6,7 @@ import { useConversationDetail, useConversationSettings } from '@/hooks/use-conv
 import { useQueryClient } from '@tanstack/react-query'
 import { createNewDefaultConversationParams, createNewMessage } from '@/services/helper'
 import { IConversationDetail } from '@/types'
-import { createConversation, generateConversationTitle } from '@/services'
+import { createConversation } from '@/services'
 import { toast } from 'sonner'
 import { AutosizeTextarea, AutosizeTextAreaRef } from '@/components/AutosizeTextarea'
 import { useOpenInspectorStatus } from '@/hooks/useOpenStatus'
@@ -102,15 +102,15 @@ export default function ChatInput({ isLoading }: ChatInputProps) {
         textAreaRef.current?.textArea?.focus()
       }, 300)
 
-      if (!conversation?.title && !isGeneratingTitle) {
-        console.log(`Title judgment: ${JSON.stringify(conversation)} |\n ${isGeneratingTitle}`)
-        setIsGeneratingTitle(true)
-        generateConversationTitle(data.conversation_id).then(() => {
-          queryClient.invalidateQueries({ queryKey: ['conversations'] })
-          queryClient.invalidateQueries({ queryKey: ['conversation', data.conversation_id] })
-          setIsGeneratingTitle(false)
-        })
-      }
+      // if (!conversation?.title && !isGeneratingTitle) {
+      //   console.log(`Title judgment: ${JSON.stringify(conversation)} |\n ${isGeneratingTitle}`)
+      //   setIsGeneratingTitle(true)
+      //   generateConversationTitle(data.conversation_id).then(() => {
+      //     queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      //     queryClient.invalidateQueries({ queryKey: ['conversation', data.conversation_id] })
+      //     setIsGeneratingTitle(false)
+      //   })
+      // }
 
       // Update free chat count
       if (!isPremium && isCloudMode) {
