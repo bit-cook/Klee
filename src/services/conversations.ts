@@ -45,5 +45,5 @@ export function generateConversationTitle(id: IConversation['id']) {
 }
 
 export function updateConversationTitle(id: IConversation['id'], title: string) {
-  return localRequest.put(`base/conversation/setting`, { json: { id, title } }).json<IConversation>()
+  return localRequest.put(`chat/conversations/${id}`, { json: { title } }).json<IConversation>()
 }
