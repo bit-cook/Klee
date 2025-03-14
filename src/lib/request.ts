@@ -87,7 +87,8 @@ const requestOptions: Options = {
               : typeof errorBody.message === 'string'
               ? errorBody.message
               : 'request failed.'
-          toast.error(message)
+
+          // toast.error(message)
           throw new Error(message)
         }
 

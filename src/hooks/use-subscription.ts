@@ -40,7 +40,7 @@ export function useSubscription() {
 export function useIsPremium() {
   const { data: subscription } = useSubscription()
   if (!supabase) return true
-  if (process.env.NODE_ENV === 'development') return true
+  // if (process.env.NODE_ENV === 'development') return true
   return subscription?.status === 'active'
 }
 
