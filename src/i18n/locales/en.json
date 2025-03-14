@@ -346,7 +346,7 @@
     "internal_error": "Internal error"
   },
   "upgrade": {
-    "title": "Your free trial has been used up",
+    "title": "Online Mode",
     "description": "Please try Klee Pro, or switch to local mode to continue using for free",
     "cancel": "Cancel",
     "switchToLocalMode": "Local Mode",

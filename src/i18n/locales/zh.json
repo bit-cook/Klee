@@ -346,7 +346,7 @@
     "internal_error": "内部错误"
   },
   "upgrade": {
-    "title": "您的试用次数已经用完",
+    "title": "在线模式",
     "description": "请尝试Klee Pro，或者切换到本地模式继续免费使用",
     "cancel": "取消",
     "switchToLocalMode": "本地模式",

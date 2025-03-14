@@ -79,6 +79,7 @@ export default function RootLayout() {
     setConfig((config) => ({ ...config, privateMode: true }))
     navigate(EnumRouterLink.DownloadingService)
   }
+
   // const handleNoPremium = () => {
   //   setConfig((config) => ({ ...config, privateMode: true }))
   // }
@@ -87,9 +88,11 @@ export default function RootLayout() {
     setShowNoPremium(true)
   }
 
-  const handleSwitchToLocalMode = () => {
+  const handleSwitchToLocalMode = async () => {
+    await syncLocalMode(true)
     setShowNoPremium(false)
     setConfig((config) => ({ ...config, privateMode: true }))
+    navigate(EnumRouterLink.DownloadingService)
   }
 
   return (
