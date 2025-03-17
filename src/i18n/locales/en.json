@@ -40,7 +40,8 @@
     "skip": "Skip",
     "continue": "Continue",
     "back": "Back",
-    "resume": "Resume"
+    "resume": "Resume",
+    "save": "Save"
   },
   "settings": {
     "title": "Settings",
@@ -153,7 +154,10 @@
     "newKnowledge": "New Knowledge",
     "newKnowledgeDescription": "Knowledge base description...",
     "newNote": "New Note",
-    "newNoteDescription": "Write down yours thoughts..."
+    "newNoteDescription": "Write down yours thoughts...",
+    "updateTitle": "Update Title",
+    "enterNewTitle": "Enter new title",
+    "titlePlaceholder": "Type your new title here."
   },
   "knowledge": {
     "newKnowledge": "New Knowledge",
@@ -315,7 +319,8 @@
     "switchToCloudMode": "Switch to cloud mode?",
     "localModeDescription": "Locally run all models on your device and no data will be sent to the cloud.",
     "cloudModeDescription": "Use advanced models from cloud providers, e.g. OpenAI, Anthropic.",
-    "noModel": "No model, please go to the guide page."
+    "noModel": "No model, please go to the guide page.",
+    "sync": "Sync"
   },
   "auth": {
     "sendConfirmationEmailError": "Error sending confirmation email.",
@@ -341,7 +346,7 @@
     "internal_error": "Internal error"
   },
   "upgrade": {
-    "title": "Your free trial has been used up",
+    "title": "Online Mode",
     "description": "Please try Klee Pro, or switch to local mode to continue using for free",
     "cancel": "Cancel",
     "switchToLocalMode": "Local Mode",

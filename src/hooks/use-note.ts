@@ -1,6 +1,6 @@
 import { createNote, getNote, getNotes } from '@/services'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useSortConfig, useSearchConfig } from './use-config'
+import { useSortConfig, useSearchConfig, useConfig } from './use-config'
 import { sortNotes } from '@/services/helper'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useConversationDetailById, useConversations } from './use-conversation'
@@ -16,11 +16,13 @@ export function useCurrentNote() {
 export function useNotes() {
   const [sortConfig] = useSortConfig()
   const [searchConfig] = useSearchConfig()
+  const [config] = useConfig()
+  const local_mode = config.privateMode ?? true
   const sortBy = sortConfig.sortByField.note
   const sortOrder = sortConfig.sortOrderField.note
   const keyword = searchConfig.searchByField.note
   return useQuery({
-    queryKey: ['notes', sortBy, sortOrder, keyword],
+    queryKey: ['notes', sortBy, sortOrder, keyword, local_mode],
     queryFn: () => getNotes({ keyword }).then((notes) => sortNotes(notes, sortBy, sortOrder)),
   })
 }

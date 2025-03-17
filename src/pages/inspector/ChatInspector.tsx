@@ -1,8 +1,6 @@
 import { useOpenInspectorStatus } from '@/hooks/useOpenStatus'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Label } from '../../components/ui/label'
-import { getKnowledgeItems, getNotes } from '@/services'
-import { useQuery } from '@tanstack/react-query'
 import { AccordionContent, AccordionItem, AccordionTrigger, Accordion } from '@/components/ui/accordion'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
@@ -24,7 +22,7 @@ import { ListSwitcher } from '@/components/ListSwitcher'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useConversationDetail, useConversationSettings } from '@/hooks/use-conversation'
-import { IBaseCheckOption, IBaseOption, IModelLanguage } from '@/types'
+import { IBaseCheckOption, IBaseOption } from '@/types'
 import { useParams } from 'react-router-dom'
 import { useOllamaLlmModels } from '@/hooks/use-ollama'
 import { useRefetchLocalLlmModel } from '@/hooks/use-llm'
@@ -35,6 +33,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useModelUpdaterWithDownloader } from '@/hooks/use-updater'
 import { useSettingTab, useIsSettingOpen } from '@/hooks/use-config'
 import { SettingsTab } from '@/constants/settings'
+import { useKnowledgeItems } from '@/hooks/use-knowledge'
+import { useNotes } from '@/hooks/use-note'
 
 function ModeSetting() {
   const { t } = useTranslation()
@@ -252,12 +252,12 @@ function ModelSetting() {
             {local_mode && selectedProvider?.id === 'local' && (
               <ListChooser label={t('inspector.path')} value={selectedModel?.path} onChoose={refetchLocalLlmModel} />
             )}
-            <ListSelector
+            {/* <ListSelector
               label={t('inspector.replyLanguage')}
               options={languages}
               value={selectedLanguageId}
               onValueChange={(value) => setSelectedLanguageId(value as IModelLanguage['id'])}
-            />
+            /> */}
             <div className="flex flex-col gap-4">
               <Label htmlFor="prompt">{t('inspector.systemPrompt')}</Label>
               <Textarea
@@ -279,11 +279,7 @@ function KnowledgeSetting() {
   const { t } = useTranslation()
   const { setKnowledgeIds } = useConversationSettings()
   const [isOpen] = useOpenInspectorStatus()
-  const { data: knowledgeItems } = useQuery({
-    queryKey: ['knowledgeItems'],
-    queryFn: () => getKnowledgeItems(),
-    enabled: isOpen,
-  })
+  const { data: knowledgeItems } = useKnowledgeItems()
   const { data: conversationDetail } = useConversationDetail()
   const knowledge_ids = useMemo(() => conversationDetail?.conversation.knowledge_ids || [], [conversationDetail])
 
@@ -333,11 +329,7 @@ function NoteSetting() {
   const [isOpen] = useOpenInspectorStatus()
   const { data: conversationDetail } = useConversationDetail()
   const note_ids = useMemo(() => conversationDetail?.conversation.note_ids || [], [conversationDetail])
-  const { data: notes } = useQuery({
-    queryKey: ['notes'],
-    queryFn: () => getNotes(),
-    enabled: isOpen,
-  })
+  const { data: notes } = useNotes()
   const { setNoteIds } = useConversationSettings()
   const noteOptions: IBaseCheckOption[] = useMemo(() => {
     return (

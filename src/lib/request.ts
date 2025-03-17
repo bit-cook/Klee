@@ -2,11 +2,10 @@ import { IErrorDetail, IBaseResponse, EnumErrorCode } from '@/types'
 import ky, { Options } from 'ky'
 import { toast } from 'sonner'
 import supabaseClient from '@/lib/supabase'
-import { atom, getDefaultStore } from 'jotai'
+import { getDefaultStore } from 'jotai'
+import { disconnectAtom } from '@/hooks/use-config'
 
 const store = getDefaultStore()
-const tokenAtom = atom<string | undefined>(undefined)
-const disconnectAtom = atom<boolean>(false)
 
 type ICloudRequestEnvironment = 'production' | 'development'
 
@@ -31,7 +30,7 @@ const requestOptions: Options = {
   // },
   // Do not automatically retry on request error, default is to retry 2 times
   retry: 0,
-  timeout: 120_000,
+  timeout: 300_000,
   hooks: {
     beforeRequest: [
       async (request) => {
@@ -88,7 +87,8 @@ const requestOptions: Options = {
               : typeof errorBody.message === 'string'
               ? errorBody.message
               : 'request failed.'
-          toast.error(message)
+
+          // toast.error(message)
           throw new Error(message)
         }
 

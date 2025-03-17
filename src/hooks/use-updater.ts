@@ -11,7 +11,7 @@ import {
   IOllamaUpdaterStatus,
 } from 'electron/types'
 import { IDownloadProgress, ILlmModel, ILlmModelWithDownloader, IProgressInfo, IUpdateCheckResult } from '@/types'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { getHeartbeat } from '@/services/status'
 import { useTranslation } from 'react-i18next'
 import { useConfig } from '@/hooks/use-config'
@@ -26,25 +26,33 @@ export const updateDownloadProgressAtom = atom<IProgressInfo | null>(null)
 
 export function useElectronUpdater() {
   const { t } = useTranslation()
+  const [retryTime, setRetryTime] = useState(0)
+
   // Check remote version information
   const {
     data: updateCheckResult,
     isPending: isCheckingForUpdates,
     error: checkForUpdatesError,
   } = useQuery<IUpdateCheckResult | null>({
-    queryKey: ['updateInfo'],
+    queryKey: ['updateInfo', retryTime],
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      const result = await window.ipcRenderer.invoke('check-for-updates')
-      console.log('[renderer] check-for-updates result', result)
-      return result || null
+      try {
+        const result = await window.ipcRenderer.invoke('check-for-updates')
+        console.log('[renderer] check-for-updates result', result)
+        return result || null
+      } catch (error) {
+        console.log('[renderer] check-for-updates error', error)
+        // if network not connect, skip
+        return null
+      }
     },
   })
   const updateInfo = updateCheckResult?.updateInfo
 
   // Get local version information
   const { data: appVersion, isPending: isGettingAppVersion } = useQuery<string>({
-    queryKey: ['appVersion'],
+    queryKey: ['appVersion', retryTime],
     queryFn: async () => {
       const version = await window.ipcRenderer.invoke('get-app-version')
       return version
@@ -150,6 +158,7 @@ export function useElectronUpdater() {
     setIsDownloadingUpdate(false)
     setIsUpdateDownloaded(false)
     setUpdateDownloadProgress(null)
+    setRetryTime((time) => time + 1)
   }
 
   return {
@@ -499,7 +508,8 @@ export function usePipeline() {
   const [config] = useConfig()
   const isPrivateMode = config.privateMode
 
-  const isElectronUpdaterCompleted = electronUpdater.status.status === 'no-update'
+  const isElectronUpdaterCompleted =
+    electronUpdater.status.status === 'no-update' || electronUpdater.status.status === 'error'
   const isKernelUpdaterCompleted = kernelUpdater.status.status === 'completed'
   const isEmbedModelUpdaterCompleted = embedModelUpdater.status.status === 'completed'
   const isOllamaUpdaterCompleted = ollamaUpdater.status.status === 'completed' || !isPrivateMode

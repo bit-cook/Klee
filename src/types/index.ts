@@ -326,10 +326,6 @@ export interface IServiceVersion {
   download_url: string
 }
 
-export interface IFetchFreeMessageCountResponse {
-  count: number
-}
-
 export interface ISource {
   id: string
   type: 'note' | 'knowledge'

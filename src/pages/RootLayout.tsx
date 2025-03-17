@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDeepLinkParams } from '@/hooks/use-deep-link-params'
 import { Toaster } from '@/components/ui/sonner'
 import supabase from '@/lib/supabase'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import CustomTitleBar from './CustomTitleBar'
 import { useConfig } from '@/hooks/use-config'
 import { useUser } from '@/lib/supabase/hooks'
@@ -24,6 +24,8 @@ import {
 import Account from './setting/Account'
 import { useTranslation } from 'react-i18next'
 import SettingsDialog from './dialog/SettingsDialog'
+import { syncLocalMode } from '@/services'
+import { EnumRouterLink } from '@/constants/paths'
 
 export default function RootLayout() {
   const { t } = useTranslation()
@@ -32,6 +34,7 @@ export default function RootLayout() {
   const [showNoLogin, setShowNoLogin] = useState(false)
   const [showUpgradeAlert, setShowUpgradeAlert] = useUpgradeAlert()
   const [showNoPremium, setShowNoPremium] = useNoPremiumAlert()
+  const navigate = useNavigate()
   // useToggleDarkMode()
 
   const [, deepLinkParams] = useDeepLinkParams<{
@@ -71,9 +74,12 @@ export default function RootLayout() {
     setShowNoLogin(!config.privateMode && !user)
   }, [user, config.privateMode, setConfig])
 
-  const handleNoLogin = () => {
+  const handleNoLogin = async () => {
+    await syncLocalMode(true)
     setConfig((config) => ({ ...config, privateMode: true }))
+    navigate(EnumRouterLink.DownloadingService)
   }
+
   // const handleNoPremium = () => {
   //   setConfig((config) => ({ ...config, privateMode: true }))
   // }
@@ -82,9 +88,11 @@ export default function RootLayout() {
     setShowNoPremium(true)
   }
 
-  const handleSwitchToLocalMode = () => {
+  const handleSwitchToLocalMode = async () => {
+    await syncLocalMode(true)
     setShowNoPremium(false)
     setConfig((config) => ({ ...config, privateMode: true }))
+    navigate(EnumRouterLink.DownloadingService)
   }
 
   return (

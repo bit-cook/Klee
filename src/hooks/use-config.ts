@@ -3,8 +3,9 @@ import { atomWithStorage } from 'jotai/utils'
 import { DEFAULT_MODEL_LANGUAGE } from '@/constants/languages'
 import { DEFAULT_BASE_COLOR } from '@/constants/base-colors'
 import { SettingsTab } from '@/constants/settings'
+import { OLLAMA_MODELS_SEARCH } from '@/constants/models'
 
-import { IConfig, ISearchConfig, ISortConfig } from '@/types'
+import { IConfig, ISearchConfig, ISortConfig, OllamaModelSearch } from '@/types'
 
 export const configAtom = atomWithStorage<IConfig>('config-1.5', {
   theme: DEFAULT_BASE_COLOR,
@@ -71,4 +72,23 @@ export function useIsSettingOpen() {
 
 export function useSettingTab() {
   return useAtom(settingTabAtom)
+}
+
+export const disconnectAtom = atom<boolean>(false)
+
+export function useDisconnect() {
+  return useAtom(disconnectAtom)
+}
+
+export const ollamaModelsSearchAtom = atomWithStorage<OllamaModelSearch[]>(
+  'ollamaModelsSearch',
+  OLLAMA_MODELS_SEARCH,
+  undefined,
+  {
+    getOnInit: true,
+  },
+)
+
+export function useOllamaModelsSearch() {
+  return useAtom(ollamaModelsSearchAtom)
 }

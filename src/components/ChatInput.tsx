@@ -6,15 +6,14 @@ import { useConversationDetail, useConversationSettings } from '@/hooks/use-conv
 import { useQueryClient } from '@tanstack/react-query'
 import { createNewDefaultConversationParams, createNewMessage } from '@/services/helper'
 import { IConversationDetail } from '@/types'
-import { createConversation, generateConversationTitle } from '@/services'
+import { createConversation, updateConversationTitle } from '@/services'
 import { toast } from 'sonner'
 import { AutosizeTextarea, AutosizeTextAreaRef } from '@/components/AutosizeTextarea'
 import { useOpenInspectorStatus } from '@/hooks/useOpenStatus'
 import { useTranslation } from 'react-i18next'
 import { useScrollToBottom } from '@/hooks/use-scroll'
 import { useConfig } from '@/hooks/use-config'
-import { useFreeChatCount } from '@/lib/supabase/hooks'
-import { useShowFreeChatCount, useUpgradeAlert, useIsPremium } from '@/hooks/use-subscription'
+import { useUpgradeAlert, useIsPremium } from '@/hooks/use-subscription'
 
 interface ChatInputProps {
   isLoading?: boolean
@@ -33,11 +32,9 @@ export default function ChatInput({ isLoading }: ChatInputProps) {
   const { setAutoScroll } = useScrollToBottom()
   const textAreaRef = useRef<AutosizeTextAreaRef | null>(null)
   const [isComposing, setIsComposing] = useState(false)
-  const { data: freeChatCount, refetch: refetchFreeChatCount } = useFreeChatCount()
   const [, setUpgradeAlert] = useUpgradeAlert()
   const [config] = useConfig()
   const isCloudMode = !config.privateMode
-  const showFreeChatCount = useShowFreeChatCount()
   const isPremium = useIsPremium()
 
   useEffect(() => {
@@ -106,22 +103,12 @@ export default function ChatInput({ isLoading }: ChatInputProps) {
       }, 300)
 
       if (!conversation?.title && !isGeneratingTitle) {
-        console.log(`Title judgment: ${JSON.stringify(conversation)} |\n ${isGeneratingTitle}`)
+        //   console.log(`Title judgment: ${JSON.stringify(conversation)} |\n ${isGeneratingTitle}`)
         setIsGeneratingTitle(true)
-        generateConversationTitle(data.conversation_id).then(() => {
+        updateConversationTitle(data.conversation_id, data.userMessage.content).then(() => {
           queryClient.invalidateQueries({ queryKey: ['conversations'] })
           queryClient.invalidateQueries({ queryKey: ['conversation', data.conversation_id] })
           setIsGeneratingTitle(false)
-        })
-      }
-
-      // Update free chat count
-      if (!isPremium && isCloudMode) {
-        refetchFreeChatCount().then((query) => {
-          const count = query.data
-          if (count === 0 && isCloudMode) {
-            setUpgradeAlert(true)
-          }
         })
       }
     },
@@ -147,12 +134,7 @@ export default function ChatInput({ isLoading }: ChatInputProps) {
 
       // Update free chat count
       if (!isPremium && isCloudMode) {
-        refetchFreeChatCount().then((query) => {
-          const count = query.data
-          if (count === 0 && isCloudMode) {
-            setUpgradeAlert(true)
-          }
-        })
+        setUpgradeAlert(true)
       }
     },
   })
@@ -178,8 +160,7 @@ export default function ChatInput({ isLoading }: ChatInputProps) {
     const trimmedMessage = message.trim()
     if (!trimmedMessage) return
     if (!isPremium) {
-      if (typeof freeChatCount === 'undefined') return
-      if (freeChatCount === 0 && isCloudMode) {
+      if (isCloudMode) {
         setUpgradeAlert(true)
         return
       }
@@ -279,12 +260,6 @@ export default function ChatInput({ isLoading }: ChatInputProps) {
             </Button>
           </div>
           <div className="flex items-center space-x-2">
-            {/* Remaining free chat count */}
-            {showFreeChatCount && (
-              <div className="text-sm text-muted-foreground">
-                {t('chat.freeChatCount', { count: freeChatCount || 0 })}
-              </div>
-            )}
             {/* Send button */}
             {isLoading || isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

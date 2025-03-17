@@ -3,7 +3,7 @@ import { IKnowledge, IBaseModel } from '@/types'
 import { createNewKnowledge } from './helper'
 
 export async function getKnowledgeItems(params?: { keyword?: string }) {
-  return localRequest.get('knowledge/', { searchParams: params }).json<IKnowledge[]>()
+  return localRequest.get('knowledge/', { searchParams: params || { keyword: '' } }).json<IKnowledge[]>()
 }
 
 export async function getKnowledgeItem(id: IKnowledge['id']) {

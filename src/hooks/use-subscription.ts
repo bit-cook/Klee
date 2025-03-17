@@ -4,7 +4,6 @@ import { useDeepLinkParams } from './use-deep-link-params'
 import { useQuery } from '@tanstack/react-query'
 import { UserSubscription } from '@/types'
 import { atom, useAtom } from 'jotai'
-import { useConfig } from './use-config'
 
 export function useSubscription() {
   const [session] = useSupabaseSession()
@@ -41,6 +40,7 @@ export function useSubscription() {
 export function useIsPremium() {
   const { data: subscription } = useSubscription()
   if (!supabase) return true
+  if (process.env.NODE_ENV === 'development') return true
   return subscription?.status === 'active'
 }
 
@@ -56,13 +56,4 @@ export const noPremiumAlertAtom = atom(false)
 
 export function useNoPremiumAlert() {
   return useAtom(noPremiumAlertAtom)
-}
-
-export function useShowFreeChatCount() {
-  const isPremium = useIsPremium()
-  const [config] = useConfig()
-  const isCloudMode = !config.privateMode
-  const showFreeChatCount = isCloudMode && !isPremium
-
-  return showFreeChatCount
 }

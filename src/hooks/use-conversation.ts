@@ -3,6 +3,7 @@ import {
   getConversations,
   getConversationWithMessages,
   updateConversationSettings,
+  updateConversationTitle,
 } from '@/services'
 import { IConversation, IConversationSettings, ILlmModel, ILlmProvider, IModelLanguage, INote } from '@/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -20,19 +21,22 @@ import {
 } from '@/hooks/use-llm'
 
 import { useModelLanguages, useDefaultModelLanguage } from '@/hooks/use-language'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useConfig, useSearchConfig, useSortConfig } from './use-config'
 import { sortConversations } from '@/services/helper'
 import { DEFAULT_MODEL_LANGUAGE } from '@/constants/languages'
+import { EnumRouterLink } from '@/constants/paths'
 
 export function useConversations() {
   const [sortConfig] = useSortConfig()
   const [searchConfig] = useSearchConfig()
+  const [config] = useConfig()
+  const local_mode = config.privateMode ?? true
   const sortBy = sortConfig.sortByField.conversation
   const sortOrder = sortConfig.sortOrderField.conversation
   const keyword = searchConfig.searchByField.conversation
   return useQuery({
-    queryKey: ['conversations', sortBy, sortOrder, keyword],
+    queryKey: ['conversations', sortBy, sortOrder, keyword, local_mode],
     queryFn: () =>
       getConversations({ keyword }).then((conversations) => sortConversations(conversations, sortBy, sortOrder)),
   })
@@ -97,9 +101,17 @@ export function useConversationDetail() {
 }
 
 export function useConversationDetailById({ id = '' }: { id?: IConversation['id'] }) {
+  const navigate = useNavigate()
   return useQuery({
     queryKey: ['conversation', id],
-    queryFn: () => getConversationWithMessages(id),
+    queryFn: () =>
+      getConversationWithMessages(id).then((data) => {
+        // If the conversation is not found, navigate to the new conversation page
+        if (!data.conversation) {
+          navigate(EnumRouterLink.ConversationNew)
+        }
+        return data
+      }),
     enabled: !!id,
   })
 }
@@ -146,10 +158,10 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
   const selectedProvider = local_mode ? selectedPrivateProvider : _selectedProvider
 
   // Currently selected model
-  const _selectedModel = useLlmModel(conversationDetail?.conversation.model_id || '') || _defaultLlmProvider?.models[0]
+  const _selectedModel = useLlmModel(conversationDetail?.conversation?.model_id || '') || _defaultLlmProvider?.models[0]
   // For klee models, only select enabled ones
   const selectedPrivateModel =
-    usePrivateLlmModel(conversationDetail?.conversation.model_id || '') ||
+    usePrivateLlmModel(conversationDetail?.conversation?.model_id || '') ||
     (defaultPrivateLlmProvider?.id === 'klee'
       ? defaultPrivateLlmProvider.models.find((model) => !model.disabled)
       : defaultPrivateLlmProvider?.models[0])
@@ -158,9 +170,9 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
   // const conversationProvider = useLlmProvider(oldConversation?.provider_id || '')
   // const conversationModel = useLlmModel(oldConversation?.model_id || '')
 
-  // const _selectedModel = useLlmModel(conversationDetail?.conversation.model_id || '') || _defaultLlmModel
+  // const _selectedModel = useLlmModel(conversationDetail?.conversation?.model_id || '') || _defaultLlmModel
   // const selectedPrivateModel =
-  //   usePrivateLlmModel(conversationDetail?.conversation.model_id || '') || defaultPrivateLlmModel
+  //   usePrivateLlmModel(conversationDetail?.conversation?.model_id || '') || defaultPrivateLlmModel
 
   const languages = useModelLanguages()
   const defaultLanguage = useDefaultModelLanguage()
@@ -187,6 +199,10 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
         local_mode,
       },
       conversation,
+    )
+    console.log(
+      '[renderer] -> useConversationSettings -> handleConversationSettingsChange',
+      JSON.stringify(newConversation),
     )
     return updateConversationSettings(id, newConversation).then((data) => {
       queryClient.setQueryData(['conversation', id], (oldConversationDetail: { conversation: IConversation }) => {
@@ -309,4 +325,17 @@ export function useConversationSettingsById({ id = '' }: { id?: IConversation['i
   // console.log('[renderer] -> useConversationSettings', JSON.stringify(data))
 
   return data
+}
+
+// update conversation title
+export function useUpdateConversationTitle() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ conversationId, title }: { conversationId: IConversation['id']; title: string }) =>
+      updateConversationTitle(conversationId, title),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({ queryKey: ['conversationsByNoteId'] })
+    },
+  })
 }

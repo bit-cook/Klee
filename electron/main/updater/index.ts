@@ -7,8 +7,8 @@ import Logger from 'electron-log/main'
 const logger = Logger.scope('[main] updater')
 
 // skip auto update in dev mode
-// const disabled = false
-const disabled = isDev
+const disabled = false
+// const disabled = isDev
 
 const autoUpdater = isWindows ? new WindowsUpdater() : getAutoUpdater()
 

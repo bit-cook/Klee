@@ -3,7 +3,7 @@ import { INote, IBaseModel } from '@/types'
 import { createNewNote } from '@/services/helper'
 
 export async function getNotes(params?: { keyword?: string }) {
-  return localRequest.get('note/', { searchParams: params }).json<INote[]>()
+  return localRequest.get('note/', { searchParams: params || { keyword: '' } }).json<INote[]>()
 }
 
 export async function getNote(id: INote['id']) {

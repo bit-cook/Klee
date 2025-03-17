@@ -1,6 +1,6 @@
 import { OllamaModelSearch } from '@/types'
 
-export const ollamaModels: OllamaModelSearch[] = [
+export const OLLAMA_MODELS_SEARCH: OllamaModelSearch[] = [
   {
     id: 10,
     model_name: 'deepseek-r1:1.5b',
