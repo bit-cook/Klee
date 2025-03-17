@@ -15,7 +15,7 @@ At its core, Klee is built on:
 
 ## 🌠 Demo
 
-<img src="public/kleedemo.GIF" alt="Klee Demo" style="border-radius: 8px;">
+<img src="public/kleedemo.GIF" alt="Klee Demo" style="border-radius: 8px">
 
 ## 🤝 Contributing
 We warmly welcome contributions to Klee! Here are some ways you can get involved:
