@@ -39,7 +39,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button'
 import { EnumRouterLink } from '@/constants/paths'
 import { useNavigate } from 'react-router-dom'
-import supabase from '@/lib/supabase/client'
 import { syncFiles, syncLocalMode } from '@/services'
 
 export default function CustomTitleBar() {
@@ -189,7 +188,7 @@ export default function CustomTitleBar() {
               onClick={() => setIsOpen(!isOpen)}
             />
           )}
-          {!routerField.onboarding && supabase && (
+          {!routerField.onboarding && import.meta.env.VITE_USE_CLOUD_MODE === 'true' && (
             <CustomSwitch
               checked={local_mode}
               onCheckedChange={handleModeChange}

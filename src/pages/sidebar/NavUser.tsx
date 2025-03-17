@@ -156,7 +156,7 @@ export default function NavUser() {
                   <LogOut className="h-4 w-4" />
                   {t('logout.title')}
                 </Button>
-              ) : supabase ? (
+              ) : (
                 <Dialog>
                   <DialogTrigger className="w-full" asChild>
                     <Button variant="ghost" size="sm" className="w-full justify-start gap-2 px-2 text-sm font-normal">
@@ -168,7 +168,7 @@ export default function NavUser() {
                     <CreateAccount />
                   </DialogContent>
                 </Dialog>
-              ) : null}
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>

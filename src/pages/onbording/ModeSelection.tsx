@@ -27,7 +27,6 @@ import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { useUser } from '@/lib/supabase/hooks'
 import { useSubscription } from '@/hooks/use-subscription'
-import supabase from '@/lib/supabase/client'
 
 export default function ModeSelection() {
   const { t } = useTranslation()
@@ -66,7 +65,7 @@ export default function ModeSelection() {
     },
     cloud: null,
   }
-  if (supabase) {
+  if (import.meta.env.VITE_USE_CLOUD_MODE === 'true') {
     selectModeData.cloud = {
       title: { text: t('onboarding.cloudMode'), icon: <Cloudy /> },
       description: t('onboarding.cloudModeDescription'),

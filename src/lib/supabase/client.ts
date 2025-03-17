@@ -22,9 +22,6 @@ function getSupabaseClient(supabaseUrl: string, supabaseAnonKey: string) {
   })
 }
 
-const defaultSupabaseClient =
-  import.meta.env.VITE_USE_SUPABASE === 'true' ? getSupabaseClient(supabaseUrl, supabaseAnonKey) : null
+const defaultSupabaseClient = getSupabaseClient(supabaseUrl, supabaseAnonKey)
 
 export default defaultSupabaseClient
-
-export const publicSupabaseClient = getSupabaseClient(supabaseUrl, supabaseAnonKey)

@@ -1,4 +1,4 @@
-import { publicSupabaseClient } from '@/lib/supabase'
+import supabase from '@/lib/supabase'
 import { OllamaModelsResponse, OllamaModel, OllamaModelSearch } from '@/types'
 import { getDefaultStore } from 'jotai'
 import { ollamaModelsSearchAtom } from '@/hooks/use-config'
@@ -22,11 +22,11 @@ export async function fetchOllamaModels(): Promise<OllamaModel[]> {
 }
 
 export async function fetchOllamaModelsSearch(): Promise<OllamaModelSearch[]> {
-  if (!publicSupabaseClient) {
+  if (!supabase) {
     console.log('No supabase client found, using local models')
     return store.get(ollamaModelsSearchAtom)
   }
-  const { data, error } = await publicSupabaseClient.from('ollama_models').select('*')
+  const { data, error } = await supabase.from('ollama_models').select('*')
   if (error) {
     // throw new Error('Failed to get Ollama model list')
     console.error(`Failed to get Ollama model list: ${error}`)

@@ -1,4 +1,3 @@
-import client, { publicSupabaseClient } from './client'
+import client from './client'
 
 export default client
-export { publicSupabaseClient }
