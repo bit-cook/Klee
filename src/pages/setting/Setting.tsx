@@ -22,7 +22,7 @@ export default function Setting() {
     { title: t('theme'), value: SettingsTab.Theme, icon: Palette },
     { title: t('local_models'), value: SettingsTab.LocalModels, icon: Database },
   ]
-  if (supabase) {
+  if (import.meta.env.VITE_USE_CLOUD_MODE === 'true') {
     settingsTabs.push({ title: t('cloud_models'), value: SettingsTab.CloudModels, icon: Server })
   }
 

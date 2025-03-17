@@ -96,7 +96,7 @@ export default function NavUser() {
                   <DropdownMenuSeparator />
                 </>
               )}
-              {user && (
+              {import.meta.env.VITE_USE_CLOUD_MODE === 'true' && user && (
                 <>
                   <Dialog>
                     <DialogTrigger className="w-full" asChild>
