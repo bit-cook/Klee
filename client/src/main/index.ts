@@ -259,7 +259,7 @@ app.on('second-instance', (_event, commandLine, _workingDirectory) => {
   }
 
   // Extract deep link URL from command line
-  const deepLinkUrl = commandLine.find((arg) => arg.startsWith('rafa://'))
+  const deepLinkUrl = commandLine.find((arg) => arg.startsWith('klee://'))
   if (deepLinkUrl) {
     handleOAuthCallback(deepLinkUrl)
   }
