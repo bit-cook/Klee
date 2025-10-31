@@ -13,11 +13,13 @@ dist-ssr
 dist-electron
 release
 *.local
-
+CLAUDE.md
 package-lock.json
 
 # Editor directories and files
 .vscode/.debug.env
+.vscode/.debug.script.mjs
+.claude/
 .idea
 .DS_Store
 *.suo
@@ -30,11 +32,12 @@ package-lock.json
 # package-lock.json is needed for npm workspaces
 pnpm-lock.yaml
 yarn.lock
+/test/
 /test-results/
 /playwright-report/
 /playwright/.cache/
 
-# CLAUDE.md
+CLAUDE.md
 
 # Environment files (keep .env.example files)
 .env
@@ -55,6 +58,7 @@ vector-db/
 
 # Ollama binaries and models (downloaded at runtime)
 ollama/
+client/resources/ollama/
 
 # Test coverage
 coverage/

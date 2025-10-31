@@ -53,7 +53,11 @@ export default defineConfig(({ command }) => {
               minify: isBuild,
               outDir: path.join(__dirname, 'dist-electron/main'),
               rollupOptions: {
-                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+                external: [
+                  ...Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+                  // Tiptap packages should not be bundled in main process
+                  /@tiptap\/.*/,
+                ],
               },
             },
           },

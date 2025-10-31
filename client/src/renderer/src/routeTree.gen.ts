@@ -112,7 +112,7 @@ const AuthenticatedmiscAgentInitialAgentIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof authRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
@@ -128,7 +128,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/knowledge-base/$shareSlug': typeof AuthenticatedMarketplaceKnowledgeBaseShareSlugRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof authRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
   '/about': typeof AuthenticatedmiscAboutRoute
@@ -230,8 +230,8 @@ declare module '@tanstack/react-router' {
     }
     '/(auth)': {
       id: '/(auth)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof authRouteRouteImport
       parentRoute: typeof rootRouteImport
     }

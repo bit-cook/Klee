@@ -120,12 +120,24 @@ klee/
    cd klee
    ```
 
-2. **Install dependencies**
+2. **Configure Tiptap Pro (Required)**
+
+   Klee uses Tiptap Pro for advanced editor features. You'll need a Tiptap Pro account:
+
+   ```bash
+   # Copy the .npmrc template
+   cp .npmrc.example .npmrc
+
+   # Edit .npmrc and replace YOUR_TIPTAP_PRO_TOKEN_HERE with your actual token
+   # Get your token from https://cloud.tiptap.dev/
+   ```
+
+3. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Set up environment variables**
+4. **Set up environment variables**
 
    Copy `.env.example` files and configure:
    ```bash
@@ -136,7 +148,38 @@ klee/
 
    See [Environment Configuration](#environment-configuration) for details.
 
-4. **Start the development server**
+5. **Set up Ollama for Private Mode (Optional)**
+
+   Private Mode requires Ollama binaries and models. You have two options:
+
+   **Option A: Use System Ollama (Recommended for Development)**
+   ```bash
+   # Install Ollama on your system
+   brew install ollama  # macOS
+   # or download from https://ollama.ai/
+
+   # Start Ollama service
+   ollama serve
+   ```
+
+   **Option B: Use Embedded Ollama (For Distribution)**
+
+   For bundled distributions, copy the offline Ollama resources:
+   ```bash
+   # The structure should be:
+   # client/resources/ollama/
+   # ├── binaries/v0.9.0/darwin/arm64/ollama
+   # └── models/nomic-embed-text/...
+
+   # You can obtain these from:
+   # 1. Download from https://github.com/ollama/ollama/releases
+   # 2. Export models: ollama export nomic-embed-text
+   # 3. Follow client/resources/ollama/README.md for structure
+   ```
+
+   > **Note**: The embedded Ollama binaries (~56MB) are not included in the repository. See `client/resources/ollama/README.md` for detailed setup instructions.
+
+6. **Start the development server**
    ```bash
    npm run dev
    ```
@@ -265,12 +308,95 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete backend deployment gui
 
 ---
 
+## Private Mode Setup
+
+### Ollama Binary and Models
+
+Private Mode requires Ollama for local AI capabilities. The embedded Ollama binaries and models are **NOT included in the repository** due to their size (~56MB+ per platform).
+
+#### For Development (Recommended)
+
+Install system Ollama:
+
+```bash
+# macOS
+brew install ollama
+ollama serve
+
+# Linux
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Windows
+# Download from https://ollama.ai/download
+```
+
+Then pull required models:
+```bash
+ollama pull nomic-embed-text  # For embeddings
+ollama pull llama3.2:1b       # Lightweight chat model (optional)
+```
+
+#### For Production Distribution
+
+To bundle Ollama with your release, set up the offline resources:
+
+**1. Download Ollama Binary**
+
+```bash
+# macOS (arm64)
+wget https://github.com/ollama/ollama/releases/download/v0.9.0/ollama-darwin-arm64
+chmod +x ollama-darwin-arm64
+mkdir -p client/resources/ollama/binaries/v0.9.0/darwin/arm64
+mv ollama-darwin-arm64 client/resources/ollama/binaries/v0.9.0/darwin/arm64/ollama
+```
+
+Other platforms:
+- Linux amd64: `https://github.com/ollama/ollama/releases/download/v0.9.0/ollama-linux-amd64`
+- Linux arm64: `https://github.com/ollama/ollama/releases/download/v0.9.0/ollama-linux-arm64`
+- Windows: Download from [ollama.ai](https://ollama.ai/download)
+
+**2. Export Models**
+
+```bash
+# Pull the model first
+ollama pull nomic-embed-text
+
+# Copy model files from ~/.ollama/models
+# Structure: client/resources/ollama/models/nomic-embed-text/{manifests,blobs}
+# See Ollama documentation for exact export process
+```
+
+**Expected Structure:**
+```
+client/resources/ollama/
+├── binaries/
+│   └── v0.9.0/
+│       ├── darwin/arm64/ollama
+│       ├── linux/amd64/ollama
+│       └── windows/amd64/ollama.exe
+└── models/
+    └── nomic-embed-text/
+        ├── manifests/
+        └── blobs/
+```
+
+#### How It Works
+
+1. App checks if system Ollama is running at `http://localhost:11434`
+2. If not found, copies embedded resources to user data directory:
+   - **macOS**: `~/Library/Application Support/klee/ollama/`
+   - **Windows**: `%APPDATA%/klee/ollama/`
+   - **Linux**: `~/.config/klee/ollama/`
+3. Launches embedded Ollama with isolated data directory
+4. System and embedded Ollama don't conflict (separate data directories)
+
+---
+
 ## Documentation
 
 - [Deployment Guide](docs/DEPLOYMENT.md) - Backend and client deployment
 - [macOS Build Guide](docs/MAC_BUILD.md) - Code signing and notarization
 - [OAuth Integration](docs/ELECTRON_SUPABASE_OAUTH_GUIDE.md) - Supabase OAuth setup
-- [Development Guidelines](CLAUDE.md) - Code style and architecture patterns
 
 ---
 
