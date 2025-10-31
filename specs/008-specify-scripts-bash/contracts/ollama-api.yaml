@@ -1,0 +1,285 @@
+openapi: 3.0.3
+info:
+  title: Ollama API
+  description: |
+    Ollama API specification for marketplace private mode integration.
+    
+    This contract documents the Ollama HTTP API endpoints used by rafa for:
+    - Listing installed models
+    - Downloading models (with streaming progress)
+    - Deleting models
+    
+    Version: 0.6.0 (ollama npm package)
+  version: 1.0.0
+  contact:
+    name: Ollama Documentation
+    url: https://github.com/ollama/ollama/blob/main/docs/api.md
+
+servers:
+  - url: http://localhost:11434
+    description: Local Ollama instance
+
+paths:
+  /api/tags:
+    get:
+      summary: List installed models
+      description: Returns a list of all models currently installed in Ollama
+      operationId: listModels
+      responses:
+        '200':
+          description: Successful response with model list
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - models
+                properties:
+                  models:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OllamaModel'
+              example:
+                models:
+                  - name: "llama3:8b"
+                    model: "llama3:8b"
+                    modified_at: "2024-05-15T10:30:00Z"
+                    size: 4661224320
+                    digest: "sha256:1234567890abcdef"
+                    details:
+                      parent_model: ""
+                      format: "gguf"
+                      family: "llama"
+                      families: ["llama"]
+                      parameter_size: "8B"
+                      quantization_level: "Q4_0"
+
+  /api/pull:
+    post:
+      summary: Download (pull) a model
+      description: |
+        Downloads a model from the Ollama registry. Returns a streaming NDJSON response
+        with real-time download progress updates.
+        
+        The response is a stream of newline-delimited JSON objects, each representing
+        a progress update.
+      operationId: pullModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Model name to pull (e.g., "llama3:8b")
+                  example: "llama3:8b"
+                stream:
+                  type: boolean
+                  description: Whether to stream progress updates (should be true)
+                  default: true
+                  example: true
+            example:
+              name: "llama3:8b"
+              stream: true
+      responses:
+        '200':
+          description: |
+            Streaming NDJSON response with progress updates.
+            Each line is a separate JSON object.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/PullProgressEvent'
+              examples:
+                manifest:
+                  value: |
+                    {"status":"pulling manifest"}
+                downloading:
+                  value: |
+                    {"status":"downloading digestname","digest":"sha256:abc123","total":4661224320,"completed":1048576}
+                verifying:
+                  value: |
+                    {"status":"verifying sha256 digest"}
+                success:
+                  value: |
+                    {"status":"success"}
+        '400':
+          description: Bad request (invalid model name)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Model not found in registry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/delete:
+    delete:
+      summary: Delete a model
+      description: |
+        Deletes a model from the local Ollama installation.
+        
+        Note: Ollama uses content-addressable storage with layer sharing.
+        Deleting a model only removes layers that are not shared with other models.
+      operationId: deleteModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Model name to delete (e.g., "llama3:8b")
+                  example: "llama3:8b"
+            example:
+              name: "llama3:8b"
+      responses:
+        '200':
+          description: Model successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Empty object on success
+                example: {}
+        '400':
+          description: Bad request (invalid model name)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "model not found"
+        '409':
+          description: Model is currently in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "model 'llama3:8b' is in use"
+
+components:
+  schemas:
+    OllamaModel:
+      type: object
+      required:
+        - name
+        - model
+        - modified_at
+        - size
+        - digest
+        - details
+      properties:
+        name:
+          type: string
+          description: Model name (e.g., "llama3:8b")
+          example: "llama3:8b"
+        model:
+          type: string
+          description: Model identifier (usually same as name)
+          example: "llama3:8b"
+        modified_at:
+          type: string
+          format: date-time
+          description: Last modification timestamp (ISO 8601)
+          example: "2024-05-15T10:30:00Z"
+        size:
+          type: integer
+          format: int64
+          description: Model size in bytes
+          example: 4661224320
+        digest:
+          type: string
+          description: Model digest (SHA256)
+          example: "sha256:1234567890abcdef"
+        details:
+          $ref: '#/components/schemas/ModelDetails'
+
+    ModelDetails:
+      type: object
+      properties:
+        parent_model:
+          type: string
+          description: Parent model name (if any)
+          example: ""
+        format:
+          type: string
+          description: Model format (e.g., "gguf")
+          example: "gguf"
+        family:
+          type: string
+          description: Model family (e.g., "llama")
+          example: "llama"
+        families:
+          type: array
+          items:
+            type: string
+          description: List of model families
+          example: ["llama"]
+        parameter_size:
+          type: string
+          description: Parameter size (e.g., "8B", "70B")
+          example: "8B"
+        quantization_level:
+          type: string
+          description: Quantization level (e.g., "Q4_0", "Q8_0")
+          example: "Q4_0"
+
+    PullProgressEvent:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: Current operation status
+          enum:
+            - "pulling manifest"
+            - "downloading digestname"
+            - "verifying sha256 digest"
+            - "writing manifest"
+            - "removing any unused layers"
+            - "success"
+          example: "downloading digestname"
+        digest:
+          type: string
+          description: Digest of the currently downloading blob (optional)
+          example: "sha256:abc123"
+        total:
+          type: integer
+          format: int64
+          description: Total bytes to download (optional)
+          example: 4661224320
+        completed:
+          type: integer
+          format: int64
+          description: Bytes downloaded so far (optional)
+          example: 1048576
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "model not found"

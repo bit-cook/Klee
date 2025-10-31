@@ -1,137 +1,353 @@
+# Klee
+
 <div align="center">
-  <a href="https://github.com/signerlabs/klee-client/releases">
-    <img src="public/favicon.ico" width="150" height="150" alt="banner" /><br>
-  </a>
+
+**An AI-Powered Knowledge Management Desktop Application**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Electron](https://img.shields.io/badge/Electron-33.4.11-blue)](https://www.electronjs.org/)
+[![React](https://img.shields.io/badge/React-18.3.1-blue)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4.2-blue)](https://www.typescriptlang.org/)
+
+[Features](#features) • [Architecture](#architecture) • [Getting Started](#getting-started) • [Documentation](#documentation) • [Contributing](#contributing)
+
 </div>
 
-# Klee
-Klee brings secure and local AI to your desktop with built-in RAG knowledge base and Markdown note. You can use local mode without any internet connection to protect your privacy.
+---
 
-You can download the latest version from our [Website](https://kleedesktop.com/) or join our [Discord](https://discord.gg/ZwMbWtVuNS) if you need any support.
+## Overview
 
-At its core, Klee is built on:
-- <u>[Ollama](https://ollama.com/)</u>: For running local LLMs quickly and efficiently.
-- <u>[LlamaIndex](https://www.llamaindex.ai/)</u>: As the data framework.
+Klee is a modern desktop application that combines AI-powered chat, knowledge base management, and note-taking capabilities. It offers both **Cloud Mode** for seamless synchronization and **Private Mode** for complete offline functionality.
 
-## 🌠 Demo
+### Key Highlights
 
-<img src="public/kleedemo.GIF" alt="Klee Demo" style="border-radius: 8px">
+- 🤖 **AI-Powered Conversations**: Integrated with OpenAI and local Ollama models
+- 📚 **Knowledge Base Management**: Organize and search through your documents with RAG (Retrieval-Augmented Generation)
+- 📝 **Rich Note-Taking**: Tiptap-based collaborative editor with Markdown support
+- 🔒 **Privacy-First**: Complete offline mode with local AI and data storage
+- ☁️ **Cloud Sync**: Optional cloud synchronization via Supabase
+- 🎨 **Modern UI**: Built with React, TailwindCSS, and shadcn/ui components
 
-## 🤝 Contributing
-We warmly welcome contributions to Klee! Here are some ways you can get involved:
+---
 
-1. Contribute Code: Develop new features or enhance existing code.
-2. Fix Bugs: Submit solutions for any bugs you encounter.
-3. Maintain Issues: Assist in managing GitHub issues.
-4. Product Design: Take part in design discussions.
-5. Write Documentation: Enhance user manuals and guides.
-6. Community Engagement: Participate in discussions and support users.
-7. Promote Usage: Help spread the word about Klee.
+## Features
 
-## 🔧 Installation
+### 🌩️ Cloud Mode
+- **Authentication**: Google OAuth and email/password via Supabase
+- **Data Sync**: PostgreSQL database with real-time updates
+- **File Storage**: Supabase Storage for documents and attachments
+- **Collaboration**: Share knowledge bases and chat configurations
 
-You can download the [released version here](https://github.com/signerlabs/klee-client/releases) or you can setup following the processes below:
+### 🔐 Private Mode
+- **Local AI**: Powered by Ollama (embedded or system-installed)
+- **Local Storage**: SQLite for structured data
+- **Vector Search**: LanceDB for semantic search (planned)
+- **Complete Offline**: No internet connection required
 
-### 1. System Requirements
+### 🛠️ Core Capabilities
+- **Multi-Model Support**: Switch between cloud (OpenAI) and local (Ollama) models
+- **Knowledge Base**: Upload documents, extract text, and query with RAG
+- **Note Management**: Create, edit, and organize notes with a rich editor
+- **Marketplace**: Browse and install community-shared agents and knowledge bases
+- **Search**: Full-text and semantic search across all content
 
-- Node.js 20.x or higher
-- Yarn 1.22.19 or higher
+---
 
-### 2. Clone the Repository
+## Architecture
 
+### Tech Stack
+
+**Frontend**
+- **Framework**: React 18.3 + TypeScript
+- **Desktop**: Electron 33.4
+- **Routing**: TanStack Router
+- **State Management**: TanStack Query (React Query)
+- **UI Components**: Radix UI + shadcn/ui
+- **Styling**: TailwindCSS
+- **Editor**: Tiptap (collaborative rich text)
+
+**Backend**
+- **Framework**: Hono (type-safe RPC)
+- **Database (Cloud)**: PostgreSQL via Drizzle ORM
+- **Database (Private)**: SQLite via Drizzle ORM
+- **Authentication**: Supabase Auth
+- **Storage**: Supabase Storage
+- **AI**: AI SDK (Vercel) with OpenAI + Ollama providers
+
+**Infrastructure**
+- **Deployment**: AWS Elastic Beanstalk (backend)
+- **Vector Store**: LanceDB (private mode, planned)
+- **Local AI**: electron-ollama
+
+### Project Structure
+
+```
+klee/
+├── client/                 # Electron + React app
+│   ├── src/
+│   │   ├── main/          # Electron main process
+│   │   │   ├── ipc/       # IPC handlers
+│   │   │   └── local/     # Private mode services
+│   │   └── renderer/      # React app
+│   │       ├── components/
+│   │       ├── hooks/     # TanStack Query hooks
+│   │       ├── routes/    # TanStack Router routes
+│   │       └── lib/       # Utilities and clients
+├── server/                 # Hono API server
+│   ├── src/
+│   │   ├── routes/        # API routes
+│   │   └── db/            # Database schemas and queries
+├── docs/                   # Documentation
+└── specs/                  # Feature specifications
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js**: 20.x or higher
+- **npm**: 9.x or higher
+- **Docker**: For local PostgreSQL (optional, cloud mode only)
+- **Ollama**: For local AI (optional, private mode only)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/signerlabs/Klee.git
+   cd klee
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   Copy `.env.example` files and configure:
+   ```bash
+   cp .env.example .env
+   cp server/.env.example server/.env
+   cp client/.env.example client/.env
+   ```
+
+   See [Environment Configuration](#environment-configuration) for details.
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+   This will start:
+   - Backend API server on `http://localhost:3000`
+   - Electron app with hot reload
+
+### Environment Configuration
+
+#### Root `.env` (for macOS builds)
 ```bash
-git clone https://github.com/signerlabs/klee-client.git
-cd klee-client
+# Apple Developer credentials (only needed for signed builds)
+APPLE_ID=your_apple_id@example.com
+APPLE_APP_SPECIFIC_PASSWORD=your_app_specific_password
+APPLE_TEAM_ID=YOUR_TEAM_ID
+CODESIGN_IDENTITY="Developer ID Application: Your Company Name (TEAMID)"
 ```
 
-### 3. Install Dependencies
-
+#### `server/.env`
 ```bash
-yarn install
-```
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key
 
-### 4. Configure Environment Variables
+# Database (Cloud Mode)
+DATABASE_URL=postgresql://user:pass@localhost:5432/klee
 
-Copy the `.env.example` file to `.env`:
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file to configure the following environment variables according to your requirements:
-
-#### Basic Configuration
-
-```
-# Remote Mode Configuration
-# Set to 'true' to enable remote mode, 'false' to use local mode (default is 'false')
-VITE_USE_SUPABASE=false
-
-# Supabase configuration (only required if VITE_USE_SUPABASE=true)
-# These are used to configure your own remote service
-# If not specified, the system will use our default deployed service
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_AUTH_CALLBACK_URL=your_callback_url
-
-# Ollama service address (default: http://localhost:11434)
-VITE_OLLAMA_BASE_URL=http://localhost:11434
-
-# Local Python service address (default: http://localhost:6190)
-VITE_REQUEST_PREFIX_URL=http://localhost:6190
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### 5. Set Up Backend Service
+#### `client/.env`
+```bash
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-Before running the client, you need to set up and start the backend service. Clone and configure the backend service repository:
+### Database Setup (Cloud Mode)
+
+1. **Start PostgreSQL**
+   ```bash
+   npm run db:up
+   ```
+
+2. **Run migrations**
+   ```bash
+   npm run db:push
+   ```
+
+3. **Configure Supabase**
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Copy your project URL and anon key to `.env` files
+   - Configure OAuth providers in Supabase dashboard
+   - Add redirect URL: `klee://auth/callback`
+
+---
+
+## Development
+
+### Available Scripts
 
 ```bash
-git clone https://github.com/signerlabs/klee-service.git
-cd klee-service
+# Development
+npm run dev              # Start both client and server in dev mode
+npm run client:dev       # Start Electron app only
+npm run server:dev       # Start API server only
+
+# Building
+npm run build            # Build for production
+npm run client:build     # Build Electron app
+npm run server:build     # Build API server
+npm run build:mac        # Build signed macOS .dmg
+
+# Database
+npm run db:up            # Start PostgreSQL with Docker
+npm run db:push          # Push schema changes
+npm run db:generate      # Generate migrations
+npm run db:migrate       # Run migrations
+
+# Deployment
+npm run server:deploy    # Deploy backend to AWS EB
 ```
 
-Follow the installation instructions in the backend repository to set up and start the service. The backend service needs to be running on port 6190 (or the port you specified in `VITE_REQUEST_PREFIX_URL`) for the client to connect properly.
+### Code Organization
 
-Refer to the [klee-service repository](https://github.com/signerlabs/klee-service) for detailed backend setup instructions.
-
-### 6. Run in Development Mode
-
-```bash
-yarn dev
+**Frontend Hooks** (`client/src/renderer/src/hooks/`)
+```
+hooks/
+├── chat/              # Chat queries and mutations
+├── knowledge-base/    # Knowledge base operations
+├── note/              # Note management
+├── marketplace/       # Marketplace operations
+├── mode/              # Private mode hooks
+└── common/            # Shared utilities
 ```
 
-This command will start both the Vite development server and the Electron application.
+**API Routes** (`server/src/routes/`)
+- Type-safe RPC using Hono
+- Automatic type inference from server to client
+- Zod validation for all inputs
 
-### 7. Build the Application - Optional
+---
 
+## Building for Production
 
-```bash
-yarn build
-```
+### macOS
 
+1. **Configure signing** (optional)
+   - Add Apple Developer credentials to root `.env`
+   - See [docs/mac-build.md](docs/mac-build.md) for details
 
-### 8. macOS App Signing and Notarization - Optional
+2. **Build**
+   ```bash
+   npm run build:mac
+   ```
 
-Edit `.env` file if you need to build a signed application for macOS.
+3. **Output**
+   - `client/release/<version>/Klee_<version>_arm64.dmg`
 
-```
-# Apple ID account
-APPLEID=your_apple_id@example.com
-# Apple ID password or app-specific password
-APPLEIDPASS=your_apple_id_password
-# Apple Developer Team ID
-APPLETEAMID=your_team_id
-```
+### Backend Deployment
 
-After building is complete, you can find the compiled application in the `dist` directory.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete backend deployment guide.
 
-## 🚀 Other Useful Commands
+---
 
-- `yarn type-check`: Run TypeScript type checking
-- `yarn lint`: Run ESLint and Stylelint for code quality checking
-- `yarn lint:fix`: Automatically fix resolvable code style issues
-- `yarn generate-icons`: Generate application icons (requires app-icon.png file)
+## Documentation
 
-## 📖 Technology Stack
+- [Deployment Guide](docs/DEPLOYMENT.md) - Backend and client deployment
+- [macOS Build Guide](docs/MAC_BUILD.md) - Code signing and notarization
+- [OAuth Integration](docs/ELECTRON_SUPABASE_OAUTH_GUIDE.md) - Supabase OAuth setup
+- [Development Guidelines](CLAUDE.md) - Code style and architecture patterns
 
-<u>[Electron](https://www.electronjs.org/)</u> | <u>[React](https://react.dev/)</u> | <u>[TypeScript](https://www.typescriptlang.org/)</u> | <u>[Vite](https://vite.dev/)</u> | <u>[Tailwind CSS](https://tailwindcss.com/)</u> | <u>[Radix UI](https://www.radix-ui.com/)</u> | <u>[i18nex](https://www.i18next.com/)</u> | <u>[React Query](https://github.com/TanStack/query/)</u> | <u>[Jotai](https://jotai.org/)</u>
+---
+
+## Technology Decisions
+
+### Why TanStack Query?
+- Automatic caching and background refetching
+- Optimistic updates for better UX
+- Built-in loading and error states
+- Perfect for client-server synchronization
+
+### Why Hono?
+- Type-safe RPC with zero configuration
+- Automatic type inference from server to client
+- Lightweight and fast
+- Works seamlessly with TanStack Query
+
+### Why Electron?
+- Cross-platform desktop support
+- Access to native APIs (file system, Ollama, SQLite)
+- Ability to bundle local AI models
+- Deep link support for OAuth
+
+### Why Two Modes?
+- **Cloud Mode**: Best for users who want sync and collaboration
+- **Private Mode**: Essential for users who need complete data privacy and offline access
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+### Code Style
+
+- Follow the existing code style
+- Use TypeScript for all new code
+- Add tests for new features
+- Update documentation as needed
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- [Electron](https://www.electronjs.org/) - Desktop framework
+- [Supabase](https://supabase.com/) - Backend as a service
+- [Ollama](https://ollama.ai/) - Local AI runtime
+- [TanStack](https://tanstack.com/) - Powerful React utilities
+- [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+- [Hono](https://hono.dev/) - Lightweight web framework
+
+---
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/signerlabs/Klee/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/signerlabs/Klee/discussions)
+
+---
+
+<div align="center">
+
+Made with ❤️ by the Klee Contributors
+
+</div>
