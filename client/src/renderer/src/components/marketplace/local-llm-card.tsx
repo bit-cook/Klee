@@ -236,17 +236,7 @@ export function LocalLLMCard({ model, index, hoveredIndex, onHover }: LocalLLMCa
                   className="w-full"
                   variant="default"
                 >
-                  {isDownloading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Downloading...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </>
-                  )}
+                  <>Download</>
                 </Button>
               )}
             </div>

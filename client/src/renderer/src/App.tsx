@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router'
 import { AlertProvider, useAlert } from '@/components/ui/alert-provider'
 import { ModeProvider } from '@/contexts/ModeContext'
+import { DownloadManagerProvider } from '@/contexts/DownloadManagerContext'
 import { queryClient } from '@/lib/query-client'
 import { modelConfig, validateModelConfig } from '@config/models'
 import { createSessionFromOAuthTokens } from '@/lib/auth'
@@ -116,12 +117,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ModeProvider>
-        <AlertProvider>
-          <OAuthHandler />
-          <RouterProvider router={router} />
-        </AlertProvider>
-        {/* TanStack Query DevTools - 仅在开发环境显示，用于调试缓存和查询状态 */}
-        <ReactQueryDevtools initialIsOpen={false} />
+        <DownloadManagerProvider>
+          <AlertProvider>
+            <OAuthHandler />
+            <RouterProvider router={router} />
+          </AlertProvider>
+          {/* TanStack Query DevTools - 仅在开发环境显示，用于调试缓存和查询状态 */}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </DownloadManagerProvider>
       </ModeProvider>
     </QueryClientProvider>
   )

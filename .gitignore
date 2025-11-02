@@ -16,6 +16,9 @@ release
 CLAUDE.md
 package-lock.json
 
+.codex
+.specify
+
 # Editor directories and files
 .vscode/.debug.env
 .vscode/.debug.script.mjs

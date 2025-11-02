@@ -19,9 +19,17 @@ export interface DiskSpaceData {
  * @returns Query result containing disk space information (total, free, used bytes)
  */
 export function useDiskSpace() {
+  const isDiskSpaceApiAvailable =
+    typeof window !== 'undefined' && Boolean(window.api?.diskSpace?.get)
+
   return useQuery({
     queryKey: ['disk-space', 'ollama'],
     queryFn: async (): Promise<DiskSpaceData | null> => {
+      if (!isDiskSpaceApiAvailable) {
+        console.warn('[useDiskSpace] Disk space API not available in current environment')
+        return null
+      }
+
       // Call IPC handler to get disk space
       const result = await window.api.diskSpace.get()
 
@@ -43,6 +51,7 @@ export function useDiskSpace() {
     },
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Refetch every 60 seconds
-    retry: 2, // Retry twice on failure
+    retry: isDiskSpaceApiAvailable ? 2 : false, // Retry twice when API exists
+    enabled: isDiskSpaceApiAvailable,
   })
 }
