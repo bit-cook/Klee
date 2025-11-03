@@ -206,7 +206,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
       <SidebarHeader>
         <div className="flex items-center py-2 px-1">
           <img src={logoImage} alt="Logo" className="h-6 w-6" />
-          <span className="ml-2 text-lg font-semibold">Rafa</span>
+          <span className="ml-2 text-lg font-semibold">Klee</span>
         </div>
         <NavMain items={navItems} onNoteClick={handleNoteNavClick} />
       </SidebarHeader>

@@ -70,7 +70,16 @@ export const useCollaboration = (room: string) => {
     setProvider(newProvider)
 
     return () => {
-      newProvider.destroy()
+      const disposable = newProvider as unknown as {
+        destroy?: () => void
+        disconnect?: () => void
+      }
+
+      if (typeof disposable.destroy === "function") {
+        disposable.destroy()
+      } else if (typeof disposable.disconnect === "function") {
+        disposable.disconnect()
+      }
     }
   }, [collabToken, ydoc, room, hasCollab])
 

@@ -35,13 +35,15 @@ if (( ${#missing[@]} > 0 )); then
 fi
 
 VERSION="$(node -p "require('./client/package.json').version")"
-echo "==> Building Rafa v$VERSION for macOS (arm64)…"
+echo "==> Building server workspace (types & API schema)…"
+npm run build --workspace=server
+echo "==> Building Klee v$VERSION for macOS (arm64)…"
 
 npm run build --workspace=client
 
 RELEASE_DIR="$ROOT_DIR/client/release/$VERSION"
-APP_PATH="$RELEASE_DIR/mac-arm64/rafa.app"
-DMG_PATH="$RELEASE_DIR/rafa_${VERSION}_arm64.dmg"
+APP_PATH="$RELEASE_DIR/mac-arm64/klee.app"
+DMG_PATH="$RELEASE_DIR/klee_${VERSION}_arm64.dmg"
 
 if [[ ! -d "$APP_PATH" ]]; then
   echo "❌ Expected app bundle not found at: $APP_PATH"

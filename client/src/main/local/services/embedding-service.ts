@@ -378,7 +378,7 @@ export async function ensureModelAvailable(
       percent: 25,
     })
 
-    const embeddedHome = process.env.RAFA_EMBEDDED_OLLAMA_HOME
+    const embeddedHome = process.env.KLEE_EMBEDDED_OLLAMA_HOME
     if (!embeddedHome) {
       console.warn(
         `[EmbeddingService] Embedded Ollama home not set; cannot provision model ${model} from bundle`

@@ -4,8 +4,8 @@ import App from './App'
 
 import './index.css'
 
-if (document.title !== 'Rafa') {
-  document.title = 'Rafa'
+if (document.title !== 'Klee') {
+  document.title = 'Klee'
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

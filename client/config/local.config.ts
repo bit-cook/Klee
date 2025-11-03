@@ -160,7 +160,7 @@ export const MODE_CONFIG = {
 export const LOGGING_CONFIG = {
   LEVEL: 'info' as 'debug' | 'info' | 'warn' | 'error',
   VERBOSE: false,
-  LOG_FILE: 'rafa-private.log',
+  LOG_FILE: 'klee-private.log',
 } as const
 
 /**

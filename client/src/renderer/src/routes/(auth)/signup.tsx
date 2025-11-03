@@ -14,7 +14,7 @@ function RouteComponent() {
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="#" className="flex items-center gap-2 font-medium">
             <img src={logoImage} alt="Logo" className="h-4 w-4" />
-            Rafa
+            Klee
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">

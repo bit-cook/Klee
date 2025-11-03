@@ -3,7 +3,7 @@
  *
  * 管理 Cloud 和 Private 模式的数据库连接
  * - Cloud Mode: 远程 PostgreSQL（由 server 管理，此处不涉及）
- * - Private Mode: 本地 SQLite（userData/rafa-private.db）
+ * - Private Mode: 本地 SQLite（userData/klee-private.db）
  *
  * 设计原则：
  * 1. 单例模式 - 全局唯一实例
@@ -49,7 +49,7 @@ class DatabaseConnectionManager {
    */
   private getPrivateDbPath(): string {
     const userDataPath = app.getPath("userData")
-    return path.join(userDataPath, "rafa-private.db")
+    return path.join(userDataPath, "klee-private.db")
   }
 
   /**
@@ -316,7 +316,7 @@ class DatabaseConnectionManager {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
     const defaultBackupDir = path.join(app.getPath("userData"), "backups")
     const finalBackupPath =
-      backupPath || path.join(defaultBackupDir, `rafa-private-${timestamp}.db`)
+      backupPath || path.join(defaultBackupDir, `klee-private-${timestamp}.db`)
 
     // 确保备份目录存在
     const backupDir = path.dirname(finalBackupPath)

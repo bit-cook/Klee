@@ -104,7 +104,7 @@ function handleOAuthCallback(url: string) {
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'Rafa',
+    title: 'Klee',
     icon: ICON_PATH,
     width: 1200,
     height: 1000,

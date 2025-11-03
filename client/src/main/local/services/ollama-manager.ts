@@ -30,7 +30,7 @@ const execAsync = promisify(exec)
 /**
  * Ollama 来源类型
  * - system: 用户已安装的系统 Ollama
- * - embedded: Rafa 内嵌的 Ollama 版本
+ * - embedded: Klee 内嵌的 Ollama 版本
  * - none: 未初始化或初始化失败
  */
 export type OllamaSource = 'system' | 'embedded' | 'none'
@@ -223,6 +223,7 @@ export class OllamaManager {
     if (!process.env.OLLAMA_MODELS) {
       process.env.OLLAMA_MODELS = modelsPath
     }
+    process.env.KLEE_EMBEDDED_OLLAMA_MODELS = modelsPath
     if (!process.env.OLLAMA_TMPDIR) {
       process.env.OLLAMA_TMPDIR = tmpPath
     }
@@ -230,14 +231,14 @@ export class OllamaManager {
       process.env.OLLAMA_HOST = '127.0.0.1:11434'
     }
 
-    process.env.RAFA_EMBEDDED_OLLAMA_HOME = dataPath
-    process.env.RAFA_EMBEDDED_OLLAMA_BIN = executablePath
+    process.env.KLEE_EMBEDDED_OLLAMA_HOME = dataPath
+    process.env.KLEE_EMBEDDED_OLLAMA_BIN = executablePath
 
     console.log('[OllamaManager] Embedded environment configured', {
       OLLAMA_HOME: process.env.OLLAMA_HOME,
       OLLAMA_MODELS: process.env.OLLAMA_MODELS,
       OLLAMA_TMPDIR: process.env.OLLAMA_TMPDIR,
-      EMBEDDED_BIN: process.env.RAFA_EMBEDDED_OLLAMA_BIN,
+      EMBEDDED_BIN: process.env.KLEE_EMBEDDED_OLLAMA_BIN,
     })
 
     onProgress?.({

@@ -71,7 +71,7 @@ function MarketplaceContent() {
     <div className="relative flex flex-col items-center justify-start h-full p-6 w-full mx-auto gap-12">
       <div className="relative flex flex-col items-center justify-center w-full gap-6 overflow-hidden pt-32">
         <Meteors number={6} />
-        <span className="text-6xl font-bold z-10">Rafa Marketplace</span>
+        <span className="text-6xl font-bold z-10">Klee Marketplace</span>
         <span className="text-xl z-10">
           Discover and connect with AI agents, knowledge bases and LLMs.
         </span>

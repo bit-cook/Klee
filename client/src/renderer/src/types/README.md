@@ -2,7 +2,7 @@
 
 ## 概述
 
-rafa 项目采用**按模式分离**的类型管理策略，将 Cloud Mode 和 Private Mode 的类型定义清晰分开：
+Klee 项目采用**按模式分离**的类型管理策略，将 Cloud Mode 和 Private Mode 的类型定义清晰分开：
 
 ```
 types/

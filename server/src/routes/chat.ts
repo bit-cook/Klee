@@ -30,7 +30,7 @@ import {
 } from "../../db/schema.js"
 import { findRelevantContent } from "../lib/ai/embedding.js"
 import { findRelevantNoteContent } from "../lib/ai/noteEmbedding.js"
-import { getRafaModel } from "../lib/ai/provider.js"
+import { getKleeModel } from "../lib/ai/provider.js"
 
 // ==================== 常量配置 ====================
 const DEFAULT_CHAT_TITLE = "New Chat"
@@ -334,13 +334,13 @@ const chat = new Hono()
           const systemText =
             chatRecord?.systemPrompt ??
             systemPrompt ??
-            "You are a helpful assistant Rafa."
+            "You are a helpful assistant Klee."
 
           const rawModel = model ?? chatRecord?.model
           const normalizedModel = normalizeModelName(rawModel)
 
           const result = streamText({
-            model: webSearch ? "perplexity/sonar" : getRafaModel(normalizedModel),
+            model: webSearch ? "perplexity/sonar" : getKleeModel(normalizedModel),
             messages: convertToModelMessages(conversation),
             system: systemText + knowledgeBaseContext,
             experimental_transform: smoothStream({ chunking: "word" }),

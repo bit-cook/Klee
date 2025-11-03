@@ -49,7 +49,7 @@ function RouteComponent() {
             words={['Better', 'Modern', 'Awesome']}
             className="text-xl md:text-xl font-bold"
           />
-          <span className="text-4xl font-bold">Rafa</span>
+          <span className="text-4xl font-bold">Klee</span>
         </div>
         <ChatPromptInput
           input={input}

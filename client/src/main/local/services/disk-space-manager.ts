@@ -68,10 +68,10 @@ function formatBytes(bytes: number): string {
  */
 export function getOllamaDiskSpace(): DiskSpaceInfo {
   try {
-    const envModelPath = process.env.OLLAMA_MODELS || process.env.RAFA_EMBEDDED_OLLAMA_MODELS
+    const envModelPath = process.env.OLLAMA_MODELS || process.env.KLEE_EMBEDDED_OLLAMA_MODELS
     const envHomePath =
-      process.env.RAFA_EMBEDDED_OLLAMA_HOME
-        ? join(process.env.RAFA_EMBEDDED_OLLAMA_HOME, 'models')
+      process.env.KLEE_EMBEDDED_OLLAMA_HOME
+        ? join(process.env.KLEE_EMBEDDED_OLLAMA_HOME, 'models')
         : undefined
     const defaultPath = join(homedir(), '.ollama', 'models')
 
