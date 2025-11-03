@@ -332,15 +332,7 @@ export async function processFileAsync(
       detail: errorMessage,
     })
 
-    return {
-      fileId,
-      storagePath: savedFilePath || '',
-      contentText: '',
-      chunksCount: 0,
-      fileSize: 0,
-      status: 'failed',
-      error: errorMessage,
-    }
+    throw error instanceof Error ? error : new Error(errorMessage)
   }
 }
 

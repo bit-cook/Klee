@@ -34,6 +34,7 @@ declare global {
    */
   interface FileProcessingError {
     fileId: string
+    knowledgeBaseId?: string
     message: string
   }
 

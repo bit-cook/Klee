@@ -26,8 +26,13 @@ export function useUploadKnowledgeBaseFile() {
         setUploadProgress(0)
       }
 
+      const handleError = () => {
+        setUploadProgress(0)
+      }
+
       window.api.knowledgeBase.onFileProcessingProgress?.(handleProgress)
       window.api.knowledgeBase.onFileProcessingComplete?.(handleComplete)
+      window.api.knowledgeBase.onFileProcessingError?.(handleError)
 
       return () => {
         window.api.knowledgeBase.removeFileProcessingListeners?.()

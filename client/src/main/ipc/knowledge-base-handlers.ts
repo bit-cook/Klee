@@ -35,6 +35,7 @@ import { VectorDbManager } from '../local/services/vector-db-manager'
 import { updateFileStatus } from '../local/db/queries/knowledge-base-files'
 import { generateStoragePath } from '../local/services/storage-service'
 import { randomUUID } from 'crypto'
+import { TextExtractionError } from '../local/lib/text-extractor'
 
 // 全局向量数据库管理器实例
 let vectorDbManager: VectorDbManager | null = null
@@ -365,21 +366,31 @@ export function registerKnowledgeBaseHandlers() {
               }
             })
             .catch(async (error) => {
-              // 更新文件状态为 failed
-              await updateFileStatus(db as any, fileId, 'failed')
+              const isTextExtractionError = error instanceof TextExtractionError
+              const errorMessage = isTextExtractionError
+                ? 'Unable to extract text from this document. Please ensure the file contains selectable text (not just images) and try again.'
+                : error instanceof Error
+                  ? error.message
+                  : 'Unknown error'
 
-              IPCLogger.error(
-                DB_CHANNELS.UPLOAD_DOCUMENT,
-                'File processing failed',
-                error instanceof Error ? error.message : 'Unknown error'
-              )
+              IPCLogger.error(DB_CHANNELS.UPLOAD_DOCUMENT, 'File processing failed', errorMessage)
 
-              // 发送错误事件到渲染进程
+              try {
+                await deleteKnowledgeBaseFile(db as any, fileId)
+              } catch (deleteError) {
+                IPCLogger.error(
+                  DB_CHANNELS.UPLOAD_DOCUMENT,
+                  'Failed to remove failed knowledge base file record',
+                  deleteError instanceof Error ? deleteError.message : deleteError
+                )
+              }
+
               const win = BrowserWindow.getAllWindows()[0]
               if (win) {
                 win.webContents.send('file-processing-error', {
                   fileId,
-                  error: error instanceof Error ? error.message : 'Unknown error',
+                  knowledgeBaseId: params.knowledgeBaseId,
+                  message: errorMessage,
                 })
                 win.webContents.send('file-processing-complete', {
                   knowledgeBaseId: params.knowledgeBaseId,

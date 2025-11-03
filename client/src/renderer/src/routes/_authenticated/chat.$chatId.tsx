@@ -180,10 +180,10 @@ function RouteComponent() {
     chatId,
     initialMessages,
     resume: false,
-    initialModel: derivedInitialConfig.model ?? selectedModel,
-    initialWebSearch: derivedInitialConfig.webSearch,
-    initialKnowledgeBaseIds: derivedInitialConfig.knowledgeBaseIds,
-    initialNoteIds: derivedInitialConfig.noteIds,
+    initialModel: isPrivateMode ? undefined : derivedInitialConfig.model ?? selectedModel,
+    initialWebSearch: isPrivateMode ? undefined : derivedInitialConfig.webSearch,
+    initialKnowledgeBaseIds: isPrivateMode ? undefined : derivedInitialConfig.knowledgeBaseIds,
+    initialNoteIds: isPrivateMode ? undefined : derivedInitialConfig.noteIds,
   })
 
   // Private Mode: useLocalChatLogic 会在内部通过 IPC 加载消息

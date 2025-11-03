@@ -123,7 +123,7 @@ function KnowledgeBaseContent() {
     [isTelegramMode]
   )
 
-  // T058: 监听 Private Mode 文件处理完成事件
+  // T058: 监听 Private Mode 文件处理完成/失败事件
   React.useEffect(() => {
     if (!isPrivateMode || !window.api?.knowledgeBase?.onFileProcessingComplete) {
       return
@@ -141,25 +141,37 @@ function KnowledgeBaseContent() {
           return next
         })
 
-        // 显示处理结果提示
         if (payload.status === 'completed') {
           showAlert({
             title: 'File processed',
             description: 'The file has been embedded and is ready to use.',
             icon: <CheckCircle2 className="h-4 w-4" />,
           })
-        } else {
-          showAlert({
-            title: 'File processing failed',
-            description: 'Failed to process the file. Please try again.',
-            variant: 'destructive',
-            icon: <AlertCircle className="h-4 w-4" />,
-          })
         }
       }
     }
 
+    const handleError = (payload: FileProcessingError) => {
+      if (payload.knowledgeBaseId && payload.knowledgeBaseId !== knowledgeBaseId) {
+        return
+      }
+
+      setProcessingFiles((prev) => {
+        const next = new Set(prev)
+        next.delete(payload.fileId)
+        return next
+      })
+
+      showAlert({
+        title: 'File processing failed',
+        description: payload.message,
+        variant: 'destructive',
+        icon: <AlertCircle className="h-4 w-4" />,
+      })
+    }
+
     window.api.knowledgeBase.onFileProcessingComplete(handleComplete)
+    window.api.knowledgeBase.onFileProcessingError?.(handleError)
 
     return () => {
       window.api.knowledgeBase.removeFileProcessingListeners?.()
