@@ -19,6 +19,23 @@ import type { PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import type { LocalChatMessage } from '@/types'
 import { streamText, type ChatStatus, type ModelMessage } from 'ai'
 
+const parseIdList = (raw?: string): string[] => {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+const areIdListsEqual = (a: string[], b: string[]) => {
+  if (a.length !== b.length) return false
+  const sortedA = [...a].sort()
+  const sortedB = [...b].sort()
+  return sortedA.every((value, index) => value === sortedB[index])
+}
+
 interface UseLocalChatLogicOptions {
   chatId?: string
   initialMessages?: LocalChatMessage[]
@@ -98,6 +115,22 @@ export function useLocalChatLogic(options: UseLocalChatLogicOptions = {}) {
     }
   }, [])
 
+  // 加载会话元数据（模型等），用于在重新进入聊天时恢复配置
+  useEffect(() => {
+    if (!chatId) return
+
+    ipcAPI
+      .getConversation(chatId)
+      .then((conversation) => {
+        if (conversation?.model) {
+          setModel(conversation.model)
+        }
+      })
+      .catch((error) => {
+        console.error('[Local Chat] Failed to load conversation metadata:', error)
+      })
+  }, [chatId])
+
   const buildMessagesForAI = useCallback(
     (chatMessages: LocalChatMessage[], ragContext?: string): ModelMessage[] => {
       const baseMessages = chatMessages.map((msg) => ({
@@ -163,25 +196,56 @@ export function useLocalChatLogic(options: UseLocalChatLogicOptions = {}) {
 
       // 检查会话是否存在，如果不存在则创建
       // 使用本地变量存储当前应该使用的模型，避免状态更新延迟
-      let currentModel = model || DEFAULT_MODEL
+      const currentModel = model && model.trim().length > 0 ? model : DEFAULT_MODEL
 
       try {
         const existingConversation = await ipcAPI.getConversation(chatId)
+        const updates: {
+          model?: string
+          availableKnowledgeBaseIds?: string[]
+          availableNoteIds?: string[]
+        } = {}
 
         if (!existingConversation) {
-          // 创建新会话 - 使用默认兼容模型
-          currentModel = DEFAULT_MODEL
           await ipcAPI.createConversation({
             id: chatId,
             title: message.text.slice(0, 50) + (message.text.length > 50 ? '...' : ''),
             model: currentModel,
           })
 
-          setModel(currentModel)
-        } else if (existingConversation.model) {
-          currentModel = existingConversation.model
-          setModel(currentModel)
+          if (currentKnowledgeBaseIds.length > 0) {
+            updates.availableKnowledgeBaseIds = currentKnowledgeBaseIds
+          }
+
+          if (currentNoteIds.length > 0) {
+            updates.availableNoteIds = currentNoteIds
+          }
+        } else {
+          const storedKbIds = parseIdList(existingConversation.availableKnowledgeBaseIds)
+          const storedNoteIds = parseIdList(existingConversation.availableNoteIds)
+
+          if (existingConversation.model !== currentModel) {
+            updates.model = currentModel
+          }
+
+          if (!areIdListsEqual(storedKbIds, currentKnowledgeBaseIds)) {
+            updates.availableKnowledgeBaseIds = currentKnowledgeBaseIds
+          }
+
+          if (!areIdListsEqual(storedNoteIds, currentNoteIds)) {
+            updates.availableNoteIds = currentNoteIds
+          }
         }
+
+        if (Object.keys(updates).length > 0) {
+          try {
+            await ipcAPI.updateConversation(chatId, updates)
+          } catch (error) {
+            console.error('[Local Chat] Failed to persist conversation configuration:', error)
+          }
+        }
+
+        setModel(currentModel)
       } catch (error) {
         console.error('[Local Chat] Failed to ensure conversation exists:', error)
       }

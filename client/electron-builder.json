@@ -21,7 +21,12 @@
   ],
   "mac": {
     "category": "public.app-category.productivity",
-    "target": ["dmg"],
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["arm64"]
+      }
+    ],
     "artifactName": "${productName}_${version}_${arch}.${ext}",
     "hardenedRuntime": true,
     "gatekeeperAssess": false,
@@ -31,6 +36,21 @@
       "Contents/Resources/app.asar.unpacked/resources/ollama/binaries/v0.9.0/darwin/arm64/ollama"
     ],
     "notarize": false
+  },
+  "dmg": {
+    "sign": true,
+    "contents": [
+      {
+        "x": 130,
+        "y": 220
+      },
+      {
+        "x": 410,
+        "y": 220,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ]
   },
   "win": {
     "target": [

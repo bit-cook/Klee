@@ -11,6 +11,8 @@
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "client:dev": "npm run dev --workspace=client",
     "build:mac": "bash ./scripts/build-macos.sh",
+    "build:mac:skip-notarize": "SKIP_NOTARIZATION=true bash ./scripts/build-macos.sh",
+    "notarize": "bash ./scripts/notarize-dmg.sh",
     "server:dev": "npm run dev --workspace=server",
     "server:build": "npm run build --workspace=server",
     "server:deploy": "npm run server:build && cd server && eb deploy",

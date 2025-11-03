@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Fragment, useEffect, useMemo, useRef } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Action, Actions } from '@/components/ai-elements/actions'
 import { CopyIcon, RefreshCcwIcon, Trash2Icon } from 'lucide-react'
 import {
@@ -29,42 +29,231 @@ type LoaderData = {
   }
 }
 
+type StoredChatConfig = {
+  model?: string
+  webSearch?: boolean
+  knowledgeBaseIds?: string[]
+  noteIds?: string[]
+}
+
+const arraysEqual = (a: string[] = [], b: string[] = []) => {
+  if (a.length !== b.length) return false
+  for (let index = 0; index < a.length; index += 1) {
+    if (a[index] !== b[index]) return false
+  }
+  return true
+}
+
+const configsEqual = (a: StoredChatConfig | null, b: StoredChatConfig) => {
+  if (!a) return false
+  if (a.model !== b.model) return false
+  if ((a.webSearch ?? false) !== (b.webSearch ?? false)) return false
+  if (!arraysEqual(a.knowledgeBaseIds ?? [], b.knowledgeBaseIds ?? [])) return false
+  if (!arraysEqual(a.noteIds ?? [], b.noteIds ?? [])) return false
+  return true
+}
+
 function RouteComponent() {
   const { chatId } = Route.useParams()
   const navigate = useNavigate()
   const search = Route.useSearch()
   const initialMessageSentRef = useRef(false)
+  const [initialStoredConfig, setInitialStoredConfig] = useState<StoredChatConfig | null>(null)
+  const lastPersistedConfigRef = useRef<StoredChatConfig | null>(null)
+  const appliedConfigSignatureRef = useRef<string | null>(null)
 
   // 检测当前模式
   const { isPrivateMode } = useMode()
 
   // 从 ChatContext 获取选中的知识库 ID 和笔记 ID (在 Private Mode 下会自动加载)
-  const { selectedKnowledgeBaseIds, selectedNoteIds } = useChatContext()
+  const {
+    selectedKnowledgeBaseIds,
+    setSelectedKnowledgeBaseIds,
+    selectedNoteIds,
+    setSelectedNoteIds,
+    selectedModel,
+    setSelectedModel,
+    webSearchEnabled,
+    setWebSearchEnabled,
+  } = useChatContext()
 
   // 使用 loader 预加载的数据（Cloud Mode）
   const { messages: initialMessages, chat } = Route.useLoaderData() as LoaderData
+
+  useEffect(() => {
+    appliedConfigSignatureRef.current = null
+
+    if (typeof window === 'undefined' || !chatId) {
+      setInitialStoredConfig(null)
+      lastPersistedConfigRef.current = null
+      return
+    }
+
+    try {
+      const raw = window.localStorage.getItem(`chat-config:${chatId}`)
+      if (!raw) {
+        setInitialStoredConfig(null)
+        lastPersistedConfigRef.current = null
+        return
+      }
+
+      const parsed = JSON.parse(raw) as StoredChatConfig
+      const normalized: StoredChatConfig = {
+        model: typeof parsed.model === 'string' ? parsed.model : undefined,
+        webSearch: typeof parsed.webSearch === 'boolean' ? parsed.webSearch : undefined,
+        knowledgeBaseIds: Array.isArray(parsed.knowledgeBaseIds)
+          ? parsed.knowledgeBaseIds.map(String)
+          : undefined,
+        noteIds: Array.isArray(parsed.noteIds) ? parsed.noteIds.map(String) : undefined,
+      }
+
+      setInitialStoredConfig(normalized)
+      lastPersistedConfigRef.current = normalized
+    } catch (error) {
+      console.error('Failed to read cached chat config:', error)
+      setInitialStoredConfig(null)
+      lastPersistedConfigRef.current = null
+    }
+  }, [chatId])
+
+  const loaderKnowledgeBaseIds = chat?.availableKnowledgeBaseIds
+  const loaderNoteIds = chat?.availableNoteIds
+
+  const derivedInitialConfig = useMemo(() => {
+    const knowledgeBaseIds =
+      search.knowledgeBaseIds !== undefined
+        ? [...search.knowledgeBaseIds]
+        : Array.isArray(loaderKnowledgeBaseIds)
+          ? [...loaderKnowledgeBaseIds]
+          : initialStoredConfig?.knowledgeBaseIds
+            ? [...initialStoredConfig.knowledgeBaseIds]
+            : undefined
+
+    const noteIds =
+      search.noteIds !== undefined
+        ? [...search.noteIds]
+        : Array.isArray(loaderNoteIds)
+          ? [...loaderNoteIds]
+          : initialStoredConfig?.noteIds
+            ? [...initialStoredConfig.noteIds]
+            : undefined
+
+    const model =
+      (typeof search.model === 'string' && search.model.trim().length > 0
+        ? search.model
+        : undefined) ??
+      (chat?.model && chat.model.trim().length > 0 ? chat.model : undefined) ??
+      (initialStoredConfig?.model && initialStoredConfig.model.trim().length > 0
+        ? initialStoredConfig.model
+        : undefined) ??
+      undefined
+
+    const webSearch =
+      search.webSearch !== undefined
+        ? search.webSearch
+        : typeof chat?.webSearchEnabled === 'boolean'
+          ? chat.webSearchEnabled
+          : typeof initialStoredConfig?.webSearch === 'boolean'
+            ? initialStoredConfig.webSearch
+            : undefined
+
+    return {
+      knowledgeBaseIds,
+      noteIds,
+      model,
+      webSearch,
+    }
+  }, [
+    search.knowledgeBaseIds,
+    search.noteIds,
+    search.model,
+    search.webSearch,
+    loaderKnowledgeBaseIds,
+    loaderNoteIds,
+    chat?.model,
+    chat?.webSearchEnabled,
+    initialStoredConfig,
+  ])
 
   // 根据模式选择聊天逻辑
   const cloudChatLogic = useChatLogic({
     chatId,
     initialMessages,
     resume: false,
-    initialModel: search.model ?? chat?.model,
-    initialWebSearch: search.webSearch ?? chat?.webSearchEnabled,
-    initialKnowledgeBaseIds: chat?.availableKnowledgeBaseIds,
-    initialNoteIds: chat?.availableNoteIds,
+    initialModel: derivedInitialConfig.model ?? selectedModel,
+    initialWebSearch: derivedInitialConfig.webSearch,
+    initialKnowledgeBaseIds: derivedInitialConfig.knowledgeBaseIds,
+    initialNoteIds: derivedInitialConfig.noteIds,
   })
 
   // Private Mode: useLocalChatLogic 会在内部通过 IPC 加载消息
   const privateChatLogic = useLocalChatLogic({
     chatId,
-    initialModel: search.model,
+    initialModel: derivedInitialConfig.model ?? selectedModel,
     knowledgeBaseIds: selectedKnowledgeBaseIds, // 从 ChatContext 获取
     noteIds: selectedNoteIds, // 从 ChatContext 获取
   })
 
   // 选择当前活跃的聊天逻辑
   const activeChat = isPrivateMode ? privateChatLogic : cloudChatLogic
+
+  useEffect(() => {
+    if (!chatId) return
+
+    const signature = JSON.stringify({
+      chatId,
+      model: derivedInitialConfig.model ?? null,
+      webSearch: derivedInitialConfig.webSearch ?? null,
+      knowledgeBaseIds: derivedInitialConfig.knowledgeBaseIds ?? null,
+      noteIds: derivedInitialConfig.noteIds ?? null,
+    })
+
+    if (appliedConfigSignatureRef.current === signature) {
+      return
+    }
+
+    appliedConfigSignatureRef.current = signature
+
+    if (
+      Array.isArray(derivedInitialConfig.knowledgeBaseIds) &&
+      !arraysEqual(selectedKnowledgeBaseIds, derivedInitialConfig.knowledgeBaseIds)
+    ) {
+      setSelectedKnowledgeBaseIds(derivedInitialConfig.knowledgeBaseIds)
+    }
+
+    if (
+      Array.isArray(derivedInitialConfig.noteIds) &&
+      !arraysEqual(selectedNoteIds, derivedInitialConfig.noteIds)
+    ) {
+      setSelectedNoteIds(derivedInitialConfig.noteIds)
+    }
+
+    if (
+      typeof derivedInitialConfig.model === 'string' &&
+      derivedInitialConfig.model &&
+      derivedInitialConfig.model !== selectedModel
+    ) {
+      setSelectedModel(derivedInitialConfig.model)
+    }
+
+    if (
+      typeof derivedInitialConfig.webSearch === 'boolean' &&
+      derivedInitialConfig.webSearch !== webSearchEnabled
+    ) {
+      setWebSearchEnabled(derivedInitialConfig.webSearch)
+    }
+  }, [
+    chatId,
+    derivedInitialConfig,
+    selectedKnowledgeBaseIds,
+    selectedNoteIds,
+    selectedModel,
+    webSearchEnabled,
+    setSelectedKnowledgeBaseIds,
+    setSelectedNoteIds,
+    setSelectedModel,
+    setWebSearchEnabled,
+  ])
 
   // 从活跃的聊天逻辑中提取需要的值
   const {
@@ -93,6 +282,31 @@ function RouteComponent() {
   const setWebSearch = isPrivateMode ? () => {} : cloudChatLogic.setWebSearch
   const isUsingAgent = isPrivateMode ? false : cloudChatLogic.isUsingAgent
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || !chatId) return
+
+    const payload: StoredChatConfig = {
+      model,
+      webSearch,
+      knowledgeBaseIds: selectedKnowledgeBaseIds,
+      noteIds: selectedNoteIds,
+    }
+
+    if (configsEqual(lastPersistedConfigRef.current, payload)) return
+
+    try {
+      window.localStorage.setItem(`chat-config:${chatId}`, JSON.stringify(payload))
+      lastPersistedConfigRef.current = {
+        model: payload.model,
+        webSearch: payload.webSearch,
+        knowledgeBaseIds: payload.knowledgeBaseIds ? [...payload.knowledgeBaseIds] : undefined,
+        noteIds: payload.noteIds ? [...payload.noteIds] : undefined,
+      }
+    } catch (error) {
+      console.error('Failed to persist chat config cache:', error)
+    }
+  }, [chatId, model, webSearch, selectedKnowledgeBaseIds, selectedNoteIds])
+
   // 计算最后一条助手消息的 ID
   const lastAssistantMessageId = messages
     .slice()
@@ -101,20 +315,42 @@ function RouteComponent() {
 
   // 自动发送初始消息（从 chat.index 传递过来的）
   useEffect(() => {
-    if (search.initialMessage && !initialMessageSentRef.current) {
-      initialMessageSentRef.current = true
+    if (!search.initialMessage || initialMessageSentRef.current) return
 
-      // 发送消息
-      handleSubmit({ text: search.initialMessage })
+    const configReady =
+      (Array.isArray(derivedInitialConfig.knowledgeBaseIds)
+        ? arraysEqual(selectedKnowledgeBaseIds, derivedInitialConfig.knowledgeBaseIds)
+        : true) &&
+      (Array.isArray(derivedInitialConfig.noteIds)
+        ? arraysEqual(selectedNoteIds, derivedInitialConfig.noteIds)
+        : true) &&
+      (derivedInitialConfig.model ? model === derivedInitialConfig.model : true) &&
+      (derivedInitialConfig.webSearch !== undefined
+        ? webSearch === derivedInitialConfig.webSearch
+        : true)
 
-      // 清除 search params，避免刷新页面重复发送
-      void navigate({
-        to: `/chat/${chatId}`,
-        search: {},
-        replace: true,
-      })
-    }
-  }, [search, chatId, handleSubmit, navigate])
+    if (!configReady) return
+
+    initialMessageSentRef.current = true
+
+    handleSubmit({ text: search.initialMessage })
+
+    void navigate({
+      to: `/chat/${chatId}`,
+      search: {},
+      replace: true,
+    })
+  }, [
+    search,
+    chatId,
+    handleSubmit,
+    navigate,
+    selectedKnowledgeBaseIds,
+    selectedNoteIds,
+    derivedInitialConfig,
+    model,
+    webSearch,
+  ])
 
   return (
     <div className="relative size-full h-screen">
@@ -209,10 +445,43 @@ function RouteComponent() {
 
 export const Route = createFileRoute('/_authenticated/chat/$chatId')({
   validateSearch: (search: Record<string, unknown>) => {
+    const parseBoolean = (value: unknown) => {
+      if (typeof value === 'boolean') return value
+      if (typeof value === 'string') {
+        if (value === 'true') return true
+        if (value === 'false') return false
+      }
+      return undefined
+    }
+
+    const parseStringArray = (value: unknown) => {
+      if (Array.isArray(value)) {
+        return value.map(String)
+      }
+
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value)
+          if (Array.isArray(parsed)) {
+            return parsed.map(String)
+          }
+        } catch {
+          return value
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0)
+        }
+      }
+
+      return undefined
+    }
+
     return {
-      initialMessage: (search.initialMessage as string) ?? undefined,
-      model: (search.model as string) ?? undefined,
-      webSearch: (search.webSearch as boolean) ?? undefined,
+      initialMessage: typeof search.initialMessage === 'string' ? search.initialMessage : undefined,
+      model: typeof search.model === 'string' ? search.model : undefined,
+      webSearch: parseBoolean(search.webSearch),
+      knowledgeBaseIds: parseStringArray(search.knowledgeBaseIds),
+      noteIds: parseStringArray(search.noteIds),
     }
   },
   loader: async ({ params }) => {

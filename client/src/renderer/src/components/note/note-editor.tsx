@@ -14,8 +14,8 @@ type NoteEditorProps = {
   // 配置选项
   autoSave?: boolean // 是否启用自动保存，默认 true
   autoEmbed?: boolean // 是否自动 embedding，默认 true
-  saveDebounceMs?: number // 保存防抖时间，默认 20000ms (20秒)
-  embedDebounceMs?: number // embedding 防抖时间，默认 30000ms (30秒)
+  saveDebounceMs?: number // 保存防抖时间（未传时沿用 useAutoSaveNote 默认值）
+  embedDebounceMs?: number // embedding 防抖时间（未传时沿用 useAutoSaveNote 默认值）
 }
 
 export function NoteEditor({
@@ -24,8 +24,8 @@ export function NoteEditor({
   initialContent,
   autoSave = true,
   autoEmbed = true,
-  saveDebounceMs = 20000, // 20秒
-  embedDebounceMs = 30000, // 30秒
+  saveDebounceMs,
+  embedDebounceMs,
 }: NoteEditorProps) {
   const normalizedInitialTitle = initialTitle ?? ''
   const normalizedInitialContent = initialContent ?? ''

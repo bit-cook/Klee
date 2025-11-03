@@ -78,6 +78,7 @@ export const insertLocalChatSessionSchema = createInsertSchema(localChatSessions
 export const updateLocalChatSessionSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long').optional(),
   starred: z.boolean().optional(),
+  model: z.string().min(1, 'Model is required').max(64, 'Model name too long').optional(),
   availableKnowledgeBaseIds: z.array(z.string().uuid()).optional(),
   availableNoteIds: z.array(z.string().uuid()).optional(),
 })

@@ -5,8 +5,8 @@ import { useDebouncedCallback } from 'use-debounce'
 
 interface AutoSaveOptions {
   noteId: string
-  saveDebounceMs?: number // 保存防抖时间，默认 20000ms (20秒)
-  embedDebounceMs?: number // embedding 防抖时间，默认 30000ms (30秒)
+  saveDebounceMs?: number // 保存防抖时间，默认 5000ms (5秒)
+  embedDebounceMs?: number // embedding 防抖时间，默认 3000ms (3秒)
   autoEmbed?: boolean // 是否自动 embedding，默认 true
   onSaveSuccess?: () => void
   onEmbedSuccess?: () => void
@@ -26,8 +26,8 @@ interface AutoSaveState {
 export function useAutoSaveNote(options: AutoSaveOptions) {
   const {
     noteId,
-    saveDebounceMs = 20000, // 20秒
-    embedDebounceMs = 30000, // 30秒
+    saveDebounceMs = 5000, // 5秒
+    embedDebounceMs = 3000, // 3秒
     autoEmbed = true,
     onSaveSuccess,
     onEmbedSuccess,

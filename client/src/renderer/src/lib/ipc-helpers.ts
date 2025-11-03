@@ -77,7 +77,16 @@ export const ipcAPI = {
     invokeIPC<LocalChatSession | null>(DB_CHANNELS.GET_CONVERSATION, { id }),
   createConversation: (params: { id: string; title: string; model: string; systemPrompt?: string }) =>
     invokeIPC<LocalChatSession>(DB_CHANNELS.CREATE_CONVERSATION, params),
-  updateConversation: (id: string, data: { title?: string; starred?: boolean; availableKnowledgeBaseIds?: string[]; availableNoteIds?: string[] }) =>
+  updateConversation: (
+    id: string,
+    data: {
+      title?: string
+      starred?: boolean
+      model?: string
+      availableKnowledgeBaseIds?: string[]
+      availableNoteIds?: string[]
+    }
+  ) =>
     invokeIPC<LocalChatSession>(DB_CHANNELS.UPDATE_CONVERSATION, { id, data }),
   deleteConversation: (id: string) =>
     invokeIPC<{ success: boolean }>(DB_CHANNELS.DELETE_CONVERSATION, { id }),

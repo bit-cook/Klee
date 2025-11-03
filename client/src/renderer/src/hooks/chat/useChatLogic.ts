@@ -37,10 +37,6 @@ export function useChatLogic(options: UseChatLogicOptions = {}) {
   const [input, setInput] = useState('')
   const queryClient = useQueryClient()
 
-  // 模型和 webSearch 状态
-  const [model, setModel] = useState<string>(initialModel ?? llmModels[0].value)
-  const [webSearch, setWebSearch] = useState(initialWebSearch ?? false)
-
   // 尝试从 ChatContext 获取状态
   let chatContext
   try {
@@ -48,6 +44,14 @@ export function useChatLogic(options: UseChatLogicOptions = {}) {
   } catch {
     chatContext = null
   }
+
+  // 模型和 webSearch 状态
+  const [localModel, setLocalModel] = useState<string>(initialModel ?? llmModels[0].value)
+  const [localWebSearch, setLocalWebSearch] = useState<boolean>(initialWebSearch ?? false)
+  const model = chatContext?.selectedModel ?? localModel
+  const setModel = chatContext?.setSelectedModel ?? setLocalModel
+  const webSearch = chatContext?.webSearchEnabled ?? localWebSearch
+  const setWebSearch = chatContext?.setWebSearchEnabled ?? setLocalWebSearch
 
   // ===== 本地状态（用于没有 Context 的情况） =====
   const [localSelectedKnowledgeBaseIds, setLocalSelectedKnowledgeBaseIds] = useState<string[]>(
@@ -88,7 +92,7 @@ export function useChatLogic(options: UseChatLogicOptions = {}) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAgentId, agentConfig, agentKnowledgeBases])
+  }, [selectedAgentId, agentConfig, agentKnowledgeBases, setModel, setWebSearch, chatContext])
 
   // 当切换聊天或加载配置时，同步初始配置
   useEffect(() => {
@@ -98,11 +102,14 @@ export function useChatLogic(options: UseChatLogicOptions = {}) {
     if (initialModel) setModel(initialModel)
     if (initialWebSearch !== undefined) setWebSearch(initialWebSearch)
 
-    if (initialKnowledgeBaseIds && chatContext?.setSelectedKnowledgeBaseIds) {
+    if (
+      initialKnowledgeBaseIds !== undefined &&
+      chatContext?.setSelectedKnowledgeBaseIds
+    ) {
       chatContext.setSelectedKnowledgeBaseIds(initialKnowledgeBaseIds)
     }
 
-    if (initialNoteIds && chatContext?.setSelectedNoteIds) {
+    if (initialNoteIds !== undefined && chatContext?.setSelectedNoteIds) {
       chatContext.setSelectedNoteIds(initialNoteIds)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,6 +120,9 @@ export function useChatLogic(options: UseChatLogicOptions = {}) {
     initialKnowledgeBaseIds,
     initialNoteIds,
     selectedAgentId,
+    chatContext,
+    setModel,
+    setWebSearch,
   ])
 
   // ===== 聊天传输配置 =====

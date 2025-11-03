@@ -11,6 +11,11 @@ export type ChatContextType = {
   knowledgeBasesList: Array<{ id: string; name: string; enabled: boolean }>
   selectedKnowledgeBaseIds: string[]
   setSelectedKnowledgeBaseIds: Dispatch<SetStateAction<string[]>>
+  // 模型 & Web Search
+  selectedModel: string
+  setSelectedModel: Dispatch<SetStateAction<string>>
+  webSearchEnabled: boolean
+  setWebSearchEnabled: Dispatch<SetStateAction<boolean>>
 
   // Agent 数据和状态
   agentsList: Array<{ id: string; name: string; description: string; icon: string }>

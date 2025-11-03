@@ -7,6 +7,8 @@ import { useChatConfigs } from '@/hooks/chat-config/queries/useChatConfigs'
 import { useNotes } from '@/hooks/note/queries/useNotes'
 import { useMode } from '@/contexts/ModeContext'
 import { ipcAPI } from '@/lib/ipc-helpers'
+import { llmModels } from '@config/models'
+import { DEFAULT_MODEL } from '@/lib/ollama-client'
 
 function ChatShellComponent() {
   const { isPrivateMode } = useMode()
@@ -15,6 +17,10 @@ function ChatShellComponent() {
 
   // 状态管理：选中的知识库、Agent、笔记
   const [selectedKnowledgeBaseIds, setSelectedKnowledgeBaseIds] = useState<string[]>([])
+  const [selectedModel, setSelectedModel] = useState<string>(
+    () => (isPrivateMode ? DEFAULT_MODEL : llmModels[0]?.value ?? '')
+  )
+  const [webSearchEnabled, setWebSearchEnabled] = useState<boolean>(false)
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined)
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([])
 
@@ -108,6 +114,9 @@ function ChatShellComponent() {
         .getConversation(chatId)
         .then(async (conversation) => {
           if (conversation) {
+            if (conversation.model) {
+              setSelectedModel(conversation.model)
+            }
             const kbIds = JSON.parse(conversation.availableKnowledgeBaseIds || '[]')
             const noteIds = JSON.parse(conversation.availableNoteIds || '[]')
             console.log('[Chat Shell] ✅ Loaded knowledge base IDs (raw):', kbIds)
@@ -176,10 +185,8 @@ function ChatShellComponent() {
               isLoadingRef.current = false
             }, 1000)
           } else {
-            // 新对话,重置为空数组并立即解除加载标记
-            console.log('[Chat Shell] 🆕 New conversation, resetting knowledge base and note IDs')
-            setSelectedKnowledgeBaseIds([])
-            setSelectedNoteIds([])
+            // 新对话：保留当前的选择（用于从首页继承的配置）
+            console.log('[Chat Shell] 🆕 New conversation detected, keeping current selections')
             isLoadingRef.current = false
           }
         })
@@ -200,6 +207,7 @@ function ChatShellComponent() {
     knowledgeBaseData.length,
     privateNotes.length,
     noteData.length,
+    setSelectedModel,
   ])
 
   // ===== Private Mode: 保存知识库和笔记关联到数据库 =====
@@ -339,6 +347,10 @@ function ChatShellComponent() {
       knowledgeBasesList,
       selectedKnowledgeBaseIds,
       setSelectedKnowledgeBaseIds,
+      selectedModel,
+      setSelectedModel,
+      webSearchEnabled,
+      setWebSearchEnabled,
       agentsList,
       selectedAgentId,
       setSelectedAgentId,
@@ -349,6 +361,8 @@ function ChatShellComponent() {
     [
       knowledgeBasesList,
       selectedKnowledgeBaseIds,
+      selectedModel,
+      webSearchEnabled,
       agentsList,
       selectedAgentId,
       notesList,
