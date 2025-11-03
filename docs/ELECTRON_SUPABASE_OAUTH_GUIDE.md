@@ -1,22 +1,22 @@
-# Electron + Supabase OAuth 实现指南
+# Electron + Supabase OAuth Implementation Guide
 
-**简洁参考版本 - 适用于所有 Electron + Supabase 项目**
-
----
-
-## 🎯 核心原理
-
-Electron 应用使用 Supabase OAuth 的关键：
-1. **系统浏览器打开** OAuth 页面（不在 Electron 窗口内）
-2. **Deep link 回调** - 使用自定义协议（如 `myapp://auth/callback`）
-3. **主进程处理** - 提取 tokens 并发送到渲染进程
-4. **创建 session** - 使用 `supabase.auth.setSession()`
+**Concise Reference - For All Electron + Supabase Projects**
 
 ---
 
-## 📋 实现步骤
+## 🎯 Core Principles
 
-### 1. 注册自定义协议
+Key aspects of using Supabase OAuth in Electron apps:
+1. **System browser** - Open OAuth page in system browser (not in Electron window)
+2. **Deep link callback** - Use custom protocol (e.g., `myapp://auth/callback`)
+3. **Main process handling** - Extract tokens and send to renderer process
+4. **Create session** - Use `supabase.auth.setSession()`
+
+---
+
+## 📋 Implementation Steps
+
+### 1. Register Custom Protocol
 
 **electron-builder.json**:
 ```json
@@ -30,55 +30,55 @@ Electron 应用使用 Supabase OAuth 的关键：
 }
 ```
 
-**主进程** (`main/index.ts`):
+**Main process** (`main/index.ts`):
 ```typescript
 import { app, shell, ipcMain } from 'electron'
 
-// 在 app.whenReady() 之前
+// Before app.whenReady()
 if (process.defaultApp) {
-  // 开发环境
+  // Development environment
   if (process.argv.length >= 2) {
     app.setAsDefaultProtocolClient('myapp', process.execPath, [
       path.resolve(process.argv[1])
     ])
   }
 } else {
-  // 生产环境
+  // Production environment
   app.setAsDefaultProtocolClient('myapp')
 }
 ```
 
-### 2. 主进程 - 注册 IPC 处理器
+### 2. Main Process - Register IPC Handlers
 
 ```typescript
 app.whenReady().then(() => {
-  // 1. 打开浏览器
+  // 1. Open browser
   ipcMain.handle('oauth:openBrowser', async (_event, url: string) => {
     await shell.openExternal(url)
     return { success: true }
   })
 
-  // ... 其他初始化代码
+  // ... other initialization code
 })
 
-// 2. 处理 OAuth 回调
+// 2. Handle OAuth callback
 function handleOAuthCallback(url: string) {
   const urlObj = new URL(url)
 
   if (urlObj.protocol === 'myapp:' && urlObj.pathname.includes('callback')) {
-    // 从 hash 提取 tokens (Supabase 使用 hash 格式)
+    // Extract tokens from hash (Supabase uses hash format)
     const accessToken = urlObj.hash.match(/access_token=([^&]*)/)?.[1]
     const refreshToken = urlObj.hash.match(/refresh_token=([^&]*)/)?.[1]
 
     if (accessToken && refreshToken) {
-      // 发送到渲染进程
+      // Send to renderer process
       mainWindow.webContents.send('oauth-success', { accessToken, refreshToken })
       mainWindow.focus()
     }
   }
 }
 
-// 3. 监听 deep link 事件
+// 3. Listen for deep link events
 // macOS
 app.on('open-url', (event, url) => {
   event.preventDefault()
@@ -97,7 +97,7 @@ app.on('second-instance', (_event, commandLine) => {
 })
 ```
 
-### 3. 渲染进程 - 发起 OAuth
+### 3. Renderer Process - Initiate OAuth
 
 **lib/auth.ts**:
 ```typescript
@@ -106,13 +106,13 @@ export async function signInWithGoogle() {
     provider: 'google',
     options: {
       redirectTo: 'myapp://auth/callback',
-      skipBrowserRedirect: true, // 关键：不自动重定向
+      skipBrowserRedirect: true, // Critical: prevent automatic redirect
     },
   })
 
   if (error) throw error
 
-  // 使用 IPC 在系统浏览器打开
+  // Open in system browser via IPC
   if (window.electron?.ipcRenderer) {
     await window.electron.ipcRenderer.invoke('oauth:openBrowser', data.url)
   }
@@ -131,7 +131,7 @@ export async function createSessionFromOAuthTokens(
 }
 ```
 
-### 4. 渲染进程 - 监听 OAuth 回调
+### 4. Renderer Process - Listen for OAuth Callback
 
 **App.tsx**:
 ```typescript
@@ -142,7 +142,7 @@ function App() {
     const handleOAuthSuccess = async (_event, { accessToken, refreshToken }) => {
       try {
         await createSessionFromOAuthTokens(accessToken, refreshToken)
-        // 导航到首页或显示成功消息
+        // Navigate to home or show success message
         router.navigate({ to: '/' })
       } catch (error) {
         console.error('Failed to create session:', error)
@@ -160,7 +160,7 @@ function App() {
 }
 ```
 
-### 5. Preload 脚本 - 暴露 IPC
+### 5. Preload Script - Expose IPC
 
 **preload/index.ts**:
 ```typescript
@@ -175,7 +175,7 @@ contextBridge.exposeInMainWorld('electron', {
 })
 ```
 
-### 6. 类型定义
+### 6. Type Definitions
 
 **global.d.ts**:
 ```typescript
@@ -190,105 +190,105 @@ interface Window {
 }
 ```
 
-### 7. Supabase Dashboard 配置
+### 7. Supabase Dashboard Configuration
 
-1. 访问: https://supabase.com/dashboard
-2. 选择项目 → **Authentication** → **URL Configuration**
-3. 添加 Redirect URL: `myapp://auth/callback`
-4. 保存
-
----
-
-## 🔑 关键要点
-
-### ✅ 必须做的
-
-1. **使用 `skipBrowserRedirect: true`** - 不让 Supabase 自动重定向
-2. **从 hash 提取 tokens** - Supabase 使用 `#access_token=...` 格式
-3. **系统浏览器打开** - 使用 `shell.openExternal`，不在 Electron 窗口内
-4. **IPC 通信** - 主进程和渲染进程通过 IPC 传递 tokens
-5. **单例锁** - Windows/Linux 需要 `requestSingleInstanceLock()`
-
-### ❌ 避免的错误
-
-1. ~~不要在 Electron 窗口内打开 OAuth~~ - Google 会阻止
-2. ~~不要直接使用 preload shell.openExternal~~ - this 绑定问题
-3. ~~不要忘记 `event.preventDefault()`~~ - macOS open-url 事件
-4. ~~不要使用 query params 提取 tokens~~ - Supabase 用 hash
+1. Visit: https://supabase.com/dashboard
+2. Select project → **Authentication** → **URL Configuration**
+3. Add Redirect URL: `myapp://auth/callback`
+4. Save
 
 ---
 
-## 🧪 测试
+## 🔑 Key Points
 
-### 开发环境
+### ✅ Must Do
+
+1. **Use `skipBrowserRedirect: true`** - Prevent Supabase from auto-redirecting
+2. **Extract tokens from hash** - Supabase uses `#access_token=...` format
+3. **Open in system browser** - Use `shell.openExternal`, not in Electron window
+4. **IPC communication** - Pass tokens between main and renderer process via IPC
+5. **Single instance lock** - Windows/Linux requires `requestSingleInstanceLock()`
+
+### ❌ Common Mistakes to Avoid
+
+1. ~~Don't open OAuth in Electron window~~ - Google will block it
+2. ~~Don't use shell.openExternal directly in preload~~ - `this` binding issues
+3. ~~Don't forget `event.preventDefault()`~~ - macOS open-url event
+4. ~~Don't extract tokens from query params~~ - Supabase uses hash
+
+---
+
+## 🧪 Testing
+
+### Development Environment
 ```bash
 npm run dev
-# 点击登录 → 浏览器打开 → 选择账号 → 自动返回应用
+# Click login → Browser opens → Select account → Auto return to app
 ```
 
-### 生产环境
+### Production Environment
 ```bash
-# 构建（跳过代码签名）
+# Build (skip code signing)
 export CSC_IDENTITY_AUTO_DISCOVERY=false
 npm run build
 
-# 安装并测试
+# Install and test
 ```
 
-### 手动测试 Deep Link
+### Manual Deep Link Testing
 ```bash
 # macOS
 open "myapp://auth/callback?test=1"
 
-# 应该看到应用聚焦并输出日志
+# Should see app focus and log output
 ```
 
 ---
 
-## 📊 完整流程
+## 📊 Complete Flow
 
 ```
-用户点击登录
+User clicks login
   ↓
-渲染进程: signInWithGoogle()
+Renderer process: signInWithGoogle()
   ↓
-Supabase: 返回 OAuth URL
+Supabase: Returns OAuth URL
   ↓
-渲染进程: IPC 调用 oauth:openBrowser
+Renderer process: IPC call oauth:openBrowser
   ↓
-主进程: shell.openExternal(url)
+Main process: shell.openExternal(url)
   ↓
-系统浏览器: 打开 Google 登录
+System browser: Opens Google login
   ↓
-用户选择账号并授权
+User selects account and authorizes
   ↓
-浏览器: 重定向到 myapp://auth/callback#access_token=...
+Browser: Redirects to myapp://auth/callback#access_token=...
   ↓
-主进程: open-url 事件触发
+Main process: open-url event triggers
   ↓
-主进程: 提取 tokens
+Main process: Extract tokens
   ↓
-主进程: IPC 发送 oauth-success
+Main process: IPC send oauth-success
   ↓
-渲染进程: createSessionFromOAuthTokens()
+Renderer process: createSessionFromOAuthTokens()
   ↓
-登录成功 ✅
+Login success ✅
 ```
 
 ---
 
-## 🐛 故障排查
+## 🐛 Troubleshooting
 
-| 问题 | 检查 | 解决 |
-|------|------|------|
-| 浏览器打开但不跳回 | Deep link 是否注册 | 重启应用或重装 |
-| Session 未创建 | 检查 IPC 监听器 | 确认 `oauth-success` 已注册 |
-| Token 提取失败 | 检查是否从 hash 提取 | 使用 `urlObj.hash.match()` |
-| 开发环境不工作 | 协议注册参数 | 使用 `process.execPath` |
+| Issue | Check | Solution |
+|-------|-------|----------|
+| Browser opens but doesn't return | Is deep link registered? | Restart app or reinstall |
+| Session not created | Check IPC listener | Confirm `oauth-success` is registered |
+| Token extraction fails | Check hash extraction | Use `urlObj.hash.match()` |
+| Dev environment not working | Protocol registration params | Use `process.execPath` |
 
 ---
 
-## 📝 最小示例
+## 📝 Minimal Example
 
 **main.ts**:
 ```typescript
@@ -312,14 +312,14 @@ app.on('open-url', (event, url) => {
 
 **renderer.tsx**:
 ```typescript
-// 发起登录
+// Initiate login
 const { data } = await supabase.auth.signInWithOAuth({
   provider: 'google',
   options: { redirectTo: 'myapp://auth/callback', skipBrowserRedirect: true },
 })
 await window.electron.ipcRenderer.invoke('oauth:openBrowser', data.url)
 
-// 监听回调
+// Listen for callback
 window.electron.ipcRenderer.on('oauth-success', async (_, { accessToken, refreshToken }) => {
   await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
 })
@@ -327,6 +327,6 @@ window.electron.ipcRenderer.on('oauth-success', async (_, { accessToken, refresh
 
 ---
 
-**创建日期**: 2025-10-28
-**测试环境**: macOS, Electron 33.2.1, Supabase 2.x
-**状态**: ✅ 生产可用
+**Created**: 2025-10-28
+**Test Environment**: macOS, Electron 33.2.1, Supabase 2.x
+**Status**: ✅ Production Ready

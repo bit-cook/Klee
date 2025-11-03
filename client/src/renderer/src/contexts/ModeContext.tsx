@@ -42,31 +42,33 @@ export interface ModeProviderProps {
  * ```
  */
 export function ModeProvider({ children }: ModeProviderProps) {
-  const [mode, setModeState] = useState<RunMode>('cloud')
+  const [mode, setModeState] = useState<RunMode>('private')
   const queryClient = useQueryClient()
 
   // T022: 从 localStorage 恢复模式（应用重启时）
   useEffect(() => {
     const savedMode = localStorage.getItem('run-mode') as RunMode | null
-    if (savedMode === 'cloud' || savedMode === 'private') {
-      setModeState(savedMode)
+    if (savedMode !== 'private') {
+      localStorage.setItem('run-mode', 'private')
     }
+    setModeState('private')
   }, [])
 
   // 切换模式并持久化到 localStorage
   const setMode = (newMode: RunMode) => {
+    const enforcedMode = newMode === 'cloud' ? 'private' : newMode
     const oldMode = mode
-    setModeState(newMode)
-    localStorage.setItem('run-mode', newMode)
+    setModeState(enforcedMode)
+    localStorage.setItem('run-mode', enforcedMode)
 
     // 通知 Electron 主进程切换数据库连接
     if (window.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.send('mode:switch', newMode)
+      window.electron.ipcRenderer.send('mode:switch', enforcedMode)
     }
 
     // 切换模式时，清除旧模式的缓存并重新获取新模式的数据
     // 这确保用户立即看到正确模式的数据
-    if (oldMode !== newMode) {
+    if (oldMode !== enforcedMode) {
       // 清除所有查询缓存（因为数据源已经改变）
       queryClient.clear()
 
